@@ -1,7 +1,8 @@
 # Civic-Chain Product Explainer Gallery
 
-Review build that houses nine product explainers behind one shared top menu.
+Review build that houses ten product explainers behind one shared top menu.
 Open `index.html` (or deploy this folder statically) and pick an explainer from the menu.
+The last entry, the system data-flow, sits behind a client-side password modal.
 
 | Explainer | Format | Best audience |
 |---|---|---|
@@ -14,3 +15,4 @@ Open `index.html` (or deploy this folder statically) and pick an explainer from 
 | Persona Journeys | Persona journey map | Sales, marketing |
 | The 3 a.m. Fuel Charge | Storyboard / comic strip | Public-facing pages, town meetings |
 | Who's Checking? | Storyboard / comic strip (simplified) | Public-facing pages, town meetings |
+| Two Rails, One Meter 🔒 | System data-flow (password-gated) | Engineering, technical diligence, counsel |

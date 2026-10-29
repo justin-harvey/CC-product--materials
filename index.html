@@ -94,6 +94,37 @@
     background:var(--ink);color:#f6f2e9;font-size:12.5px;padding:8px 14px;border-radius:999px;
     box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.2s;z-index:30}
   .hint.show{opacity:.94}
+
+  /* ---- gated item: lock badge ---- */
+  .lock{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+    letter-spacing:.3px;text-transform:uppercase;color:var(--gold);background:#f3ecdc;
+    border:1px solid #e4d3a8;border-radius:999px;padding:3px 9px;margin-left:8px;vertical-align:middle}
+  .lock svg{width:11px;height:11px}
+  nav button.gated::after{content:"\1F512";font-size:10px;margin-left:5px;opacity:.75}
+
+  /* ---- password modal ---- */
+  .modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+    background:rgba(20,16,48,.55);backdrop-filter:blur(3px);padding:20px}
+  .modal.show{display:flex}
+  .modal .box{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 10px 40px rgba(32,26,78,.30);width:100%;max-width:400px;padding:26px 24px 22px;text-align:left}
+  .modal .ic{width:40px;height:40px;border-radius:10px;background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .modal .ic svg{width:20px;height:20px}
+  .modal h2{font-family:"DM Serif Text",Georgia,serif;font-weight:400;font-size:21px;margin:0 0 6px}
+  .modal p{margin:0 0 16px;color:var(--muted);font-size:13.5px;line-height:1.55}
+  .modal form{display:flex;flex-direction:column;gap:10px}
+  .modal input{font:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--line);
+    border-radius:10px;background:#fff;color:var(--ink);outline:none;transition:.12s}
+  .modal input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .modal .err{color:#a3341f;font-size:12.5px;min-height:16px;margin:0}
+  .modal .actions{display:flex;gap:9px;justify-content:flex-end;margin-top:2px}
+  .modal button{font:inherit;font-size:14px;font-weight:600;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  .modal .primary{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+  .modal .primary:hover{background:#2f2e78}
+  .modal .ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .modal .ghost:hover{background:#f1eee4}
+
   @media (max-width:560px){.brand span{display:none}.lede h1{font-size:25px}}
 </style>
 </head>
@@ -112,9 +143,10 @@
   <section id="home">
     <div class="wrap">
       <div class="lede">
-        <h1>One story, told nine ways</h1>
-        <p>Nine explainers for the two Civic-Chain products, the one that <em>decides</em> spending
-           and the one that <em>proves</em> it. Each uses a different format tuned to a different room.
+        <h1>One story, told ten ways</h1>
+        <p>Ten views of the two Civic-Chain products, the one that <em>decides</em> spending
+           and the one that <em>proves</em> it. Nine are plain-language explainers, each tuned to a
+           different room; the tenth is the full system data-flow, kept behind a password for technical review.
            Pick one from the menu above, or open a card to see what it is, who it's for, and what it shows best.</p>
       </div>
       <div class="grid" id="grid"></div>
@@ -127,6 +159,26 @@
 </main>
 
 <div class="hint" id="hint">Press <b>&nbsp;Esc&nbsp;</b> or click the logo to return to the gallery</div>
+
+<div class="modal" id="gate" aria-hidden="true">
+  <div class="box" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h2 id="gateTitle">Protected explainer</h2>
+    <p id="gateDesc">This explainer is reserved for technical review. Enter the password to continue.</p>
+    <form id="gateForm" autocomplete="off">
+      <input id="gatePass" type="password" placeholder="Password" aria-label="Password" autocomplete="off" />
+      <p class="err" id="gateErr" role="alert"></p>
+      <div class="actions">
+        <button type="button" class="ghost" id="gateCancel">Cancel</button>
+        <button type="submit" class="primary">Unlock</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script>
   const demos = [
@@ -210,6 +262,16 @@
       what:"A stripped-down comic that poses one question, who's checking this, and answers it in a few panels. The leaner cousin of 'The 3 a.m. Fuel Charge.'",
       who:"Public-facing pages, town meetings",
       shows:"The trust payoff in the fewest possible panels, ideal when attention is short."
+    },
+    {
+      id:"two-rails-one-meter",
+      file:"demos/two-rails-one-meter.html",
+      title:"Two Rails, One Meter",
+      format:"System data-flow",
+      gated:true,
+      what:"The whole platform in one picture: public money moves on one rail, the public record on another, they meet only at a shared anchor relay, and a single meter bills only confirmed on-chain records. Seven figures trace funding, budgeting, the card, the vendor payout, TLaaS ingestion, the signing wallets, and where metering actually fires.",
+      who:"Engineering, technical diligence, counsel",
+      shows:"Exactly how value and record stay separate, what each hop posts to which book, and the one billable unit in the whole system."
     }
   ];
 
@@ -226,6 +288,7 @@
   demos.forEach(d=>{
     const b = el('button', d.title);
     b.dataset.id = d.id;
+    if(d.gated) b.classList.add('gated');
     b.onclick = ()=>go(d.id);
     nav.appendChild(b);
   });
@@ -235,7 +298,7 @@
     const card = el('div'); card.className='card'; card.onclick=()=>go(d.id);
     card.innerHTML = `
       <div class="top">
-        <span class="tag">${d.format}</span>
+        <span class="tag">${d.format}</span>${d.gated ? `<span class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Password</span>` : ``}
         <h3>${d.title}</h3>
       </div>
       <div class="body">
@@ -259,6 +322,7 @@
       return;
     }
     const d = demos.find(x=>x.id===id); if(!d) return go('home');
+    if(d.gated && !unlocked.has(d.id)){ openGate(d); return; }
     home.classList.add('hide');
     frame.src = d.file; frame.classList.add('show');
     hint.classList.add('show');
@@ -267,11 +331,57 @@
     document.title = d.title + ' · Civic-Chain Explainers';
   }
 
+  /* ---- password gate (client-side; keeps the explainer off casual view) ---- */
+  const GATE_PASS = 'faisonlawgroup';
+  const unlocked = new Set(
+    (sessionStorage.getItem('cc_unlocked') || '').split(',').filter(Boolean)
+  );
+  const gate = document.getElementById('gate');
+  const gateForm = document.getElementById('gateForm');
+  const gatePass = document.getElementById('gatePass');
+  const gateErr = document.getElementById('gateErr');
+  const gateDesc = document.getElementById('gateDesc');
+  let pendingGateId = null;
+
+  function openGate(d){
+    pendingGateId = d.id;
+    gateErr.textContent = '';
+    gatePass.value = '';
+    gateDesc.textContent = `“${d.title}” is reserved for technical review. Enter the password to continue.`;
+    gate.classList.add('show');
+    gate.setAttribute('aria-hidden','false');
+    setTimeout(()=>gatePass.focus(), 30);
+  }
+  function closeGate(){
+    gate.classList.remove('show');
+    gate.setAttribute('aria-hidden','true');
+    pendingGateId = null;
+  }
+  gateForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    if(gatePass.value === GATE_PASS){
+      const id = pendingGateId;
+      unlocked.add(id);
+      sessionStorage.setItem('cc_unlocked', [...unlocked].join(','));
+      closeGate();
+      go(id);
+    } else {
+      gateErr.textContent = 'That password is not correct.';
+      gatePass.select();
+    }
+  });
+  document.getElementById('gateCancel').onclick = ()=>{ closeGate(); go('home'); };
+  gate.addEventListener('click', e=>{ if(e.target===gate){ closeGate(); go('home'); } });
+
   function setActive(id){
     [...nav.querySelectorAll('button')].forEach(b=>b.classList.toggle('active', b.dataset.id===id));
   }
 
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape') go('home'); });
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape') return;
+    if(gate.classList.contains('show')){ closeGate(); go('home'); }
+    else go('home');
+  });
   window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(h && demos.find(x=>x.id===h)) go(h); });
 
   // deep-link on load
