@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Civic-Chain — Product Explainer Gallery</title>
+<style>
+  :root{
+    --ink:#10221c;
+    --paper:#f6f3ec;
+    --card:#ffffff;
+    --line:#d9d2c3;
+    --accent:#1f6b4f;
+    --accent-soft:#e7f0ea;
+    --muted:#5f6b63;
+    --shadow:0 1px 2px rgba(16,34,28,.06),0 8px 24px rgba(16,34,28,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--paper);
+    display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  }
+
+  /* ---- top bar ---- */
+  header{
+    flex:0 0 auto;background:var(--ink);color:#f6f3ec;
+    border-bottom:3px solid var(--accent);
+  }
+  .bar{
+    display:flex;align-items:center;gap:18px;
+    padding:10px 20px;max-width:1400px;margin:0 auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;cursor:pointer;flex:0 0 auto}
+  .brand .dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(31,107,79,.25)}
+  .brand b{font-size:15px;letter-spacing:.2px}
+  .brand span{font-size:12px;color:#a7b7ae;margin-left:2px}
+  nav{display:flex;gap:4px;flex-wrap:wrap;overflow-x:auto}
+  nav button{
+    font:inherit;font-size:13px;color:#cfd9d2;background:transparent;
+    border:1px solid transparent;border-radius:8px;padding:7px 11px;cursor:pointer;
+    white-space:nowrap;transition:.12s;
+  }
+  nav button:hover{background:rgba(255,255,255,.08);color:#fff}
+  nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* ---- stage ---- */
+  main{flex:1 1 auto;position:relative;overflow:hidden}
+  iframe{width:100%;height:100%;border:0;background:#fff;display:none}
+  iframe.show{display:block}
+
+  /* ---- landing grid ---- */
+  #home{position:absolute;inset:0;overflow:auto;padding:36px 20px 60px}
+  #home.hide{display:none}
+  .wrap{max-width:1180px;margin:0 auto}
+  .lede{max-width:720px;margin:0 0 30px}
+  .lede h1{font-size:28px;margin:0 0 8px;letter-spacing:-.3px}
+  .lede p{margin:0;color:var(--muted);font-size:15px;line-height:1.6}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:20px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;
+    transition:.15s;cursor:pointer;
+  }
+  .card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(16,34,28,.08),0 14px 34px rgba(16,34,28,.14);border-color:#bcae92}
+  .card .top{padding:18px 18px 4px}
+  .tag{
+    display:inline-block;font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+    color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:4px 10px;margin-bottom:10px;
+  }
+  .card h3{margin:0 0 2px;font-size:18px;letter-spacing:-.2px}
+  .card .fmt{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+  .card .body{padding:0 18px 16px;flex:1 1 auto}
+  .row{margin:10px 0}
+  .row .lab{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#8a9389;margin:0 0 2px}
+  .row .val{font-size:13.5px;line-height:1.5;color:#283530;margin:0}
+  .card .foot{
+    padding:12px 18px;border-top:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;background:#fbfaf6;
+  }
+  .card .foot .open{font-size:13px;font-weight:600;color:var(--accent)}
+  .card .foot .arrow{color:var(--accent);font-size:16px;transition:.15s}
+  .card:hover .foot .arrow{transform:translateX(4px)}
+  footer.note{max-width:1180px;margin:34px auto 0;color:#97a096;font-size:12.5px;line-height:1.6}
+
+  /* ---- in-frame back strip (only visible when a demo is open) ---- */
+  .hint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#f6f3ec;font-size:12.5px;padding:8px 14px;border-radius:999px;
+    box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.2s;z-index:30}
+  .hint.show{opacity:.92}
+  @media (max-width:560px){.brand span{display:none}.lede h1{font-size:23px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand" onclick="go('home')" title="Back to gallery">
+      <span class="dot"></span>
+      <b>Civic-Chain</b><span>Product Explainers</span>
+    </div>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main>
+  <section id="home">
+    <div class="wrap">
+      <div class="lede">
+        <h1>One story, told eight ways</h1>
+        <p>Six explainers for the two Civic-Chain products — the one that <em>decides</em> spending
+           and the one that <em>proves</em> it. Each uses a different format tuned to a different room.
+           Pick one from the menu above, or open a card to see what it is, who it's for, and what it shows best.</p>
+      </div>
+      <div class="grid" id="grid"></div>
+      <footer class="note">
+        Internal review build. Each explainer is a standalone page; this gallery simply frames them with a shared menu.
+      </footer>
+    </div>
+  </section>
+  <iframe id="frame" title="demo viewer"></iframe>
+</main>
+
+<div class="hint" id="hint">Press <b>&nbsp;Esc&nbsp;</b> or click the logo to return to the gallery</div>
+
+<script>
+  const demos = [
+    {
+      id:"follow-the-dollar",
+      file:"demos/follow-the-dollar.html",
+      title:"Follow the Dollar",
+      format:"Follow-the-dollar narrative",
+      what:"One dollar's path from budget line, to solicitation, award, payment, published record, and the resident's check. Both products appear as stages of a single story.",
+      who:"Councils, residents, sales demos",
+      shows:"The full lifecycle of public money as one continuous, auditable trail."
+    },
+    {
+      id:"product-flow",
+      file:"demos/product-flow.html",
+      title:"Product Flow",
+      format:"Service blueprint",
+      what:"How the two products hand off to each other — what the resident sees, what staff do, and what the system does, with the shared verification layer underneath as the support row.",
+      who:"Product, design and ops teams",
+      shows:"Where one product decides spending and the other proves it, and how they work better together."
+    },
+    {
+      id:"product-overlap",
+      file:"demos/product-overlap.html",
+      title:"Product Overlap",
+      format:"Venn / overlap diagram",
+      what:"Two jobs — running a fair purchase and publishing the books — resting on one shared standard of proof. What's unique to each and what they hold in common, at a glance.",
+      who:"Slide openers, quick pitches",
+      shows:"The shared foundation between the two products, fast — simple, but it doesn't show flow or value."
+    },
+    {
+      id:"capability-map",
+      file:"demos/capability-map.html",
+      title:"Capability Map",
+      format:"Comparison matrix",
+      what:"The two products side by side, capability by capability: buy fairly and award with confidence, versus show residents the books and prove they're real.",
+      who:"Procurement officers comparing options",
+      shows:"A feature-by-feature comparison that answers 'which product does what?'"
+    },
+    {
+      id:"persona-journeys",
+      file:"demos/persona-journeys.html",
+      title:"Persona Journeys",
+      format:"Persona journey map",
+      what:"Three people around one public dollar — Dot the resident, Marco the vendor, and Ruth the finance director — walked through their day before and after, with pain points marked.",
+      who:"Sales, marketing",
+      shows:"The human payoff for each role, grounded in a concrete before-and-after."
+    },
+    {
+      id:"comic-strip",
+      file:"demos/comic-strip.html",
+      title:"The 3 a.m. Fuel Charge",
+      format:"Storyboard / comic strip",
+      what:"A short panel scenario: a suspicious 3 a.m. fuel charge, and how a resident (or clerk) checks it and gets a straight answer. Civic scenes and stamps carry the story.",
+      who:"Public-facing pages, town meetings",
+      shows:"A real, relatable moment where the system earns trust — made to be read in seconds."
+    }
+  ];
+
+  const nav = document.getElementById('nav');
+  const grid = document.getElementById('grid');
+  const frame = document.getElementById('frame');
+  const home = document.getElementById('home');
+  const hint = document.getElementById('hint');
+
+  // build nav
+  const homeBtn = el('button','Gallery');
+  homeBtn.onclick = ()=>go('home');
+  nav.appendChild(homeBtn);
+  demos.forEach(d=>{
+    const b = el('button', d.title);
+    b.dataset.id = d.id;
+    b.onclick = ()=>go(d.id);
+    nav.appendChild(b);
+  });
+
+  // build cards
+  demos.forEach(d=>{
+    const card = el('div'); card.className='card'; card.onclick=()=>go(d.id);
+    card.innerHTML = `
+      <div class="top">
+        <span class="tag">${d.format}</span>
+        <h3>${d.title}</h3>
+      </div>
+      <div class="body">
+        <div class="row"><p class="lab">What it is</p><p class="val">${d.what}</p></div>
+        <div class="row"><p class="lab">Who it's for</p><p class="val">${d.who}</p></div>
+        <div class="row"><p class="lab">What it shows best</p><p class="val">${d.shows}</p></div>
+      </div>
+      <div class="foot"><span class="open">Open explainer</span><span class="arrow">&rarr;</span></div>`;
+    grid.appendChild(card);
+  });
+
+  function el(tag,text){const e=document.createElement(tag);if(text)e.textContent=text;return e;}
+
+  function go(id){
+    if(id==='home'){
+      frame.classList.remove('show'); frame.src='about:blank';
+      home.classList.remove('hide');
+      hint.classList.remove('show');
+      setActive(null);
+      location.hash='';
+      return;
+    }
+    const d = demos.find(x=>x.id===id); if(!d) return go('home');
+    home.classList.add('hide');
+    frame.src = d.file; frame.classList.add('show');
+    hint.classList.add('show');
+    setActive(id);
+    location.hash = id;
+    document.title = d.title + ' — Civic-Chain Explainers';
+  }
+
+  function setActive(id){
+    [...nav.querySelectorAll('button')].forEach(b=>b.classList.toggle('active', b.dataset.id===id));
+  }
+
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') go('home'); });
+  window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(h && demos.find(x=>x.id===h)) go(h); });
+
+  // deep-link on load
+  const start = location.hash.slice(1);
+  if(start && demos.find(x=>x.id===start)) go(start); else go('home');
+</script>
+</body>
+</html>
