@@ -3,47 +3,53 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Civic-Chain — Product Explainer Gallery</title>
+<title>Civic-Chain Product Explainer Gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Text&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#10221c;
-    --paper:#f6f3ec;
-    --card:#ffffff;
-    --line:#d9d2c3;
-    --accent:#1f6b4f;
-    --accent-soft:#e7f0ea;
-    --muted:#5f6b63;
-    --shadow:0 1px 2px rgba(16,34,28,.06),0 8px 24px rgba(16,34,28,.08);
+    /* Civic-Chain brand tokens: Civic Ink (blue) primary, cream surfaces, gold = value */
+    --ink:#201a4e;          /* blue-900, Civic Ink, foreground */
+    --paper:#f6f2e9;        /* cream-200, page background */
+    --card:#fdfbf5;         /* cream-50, card / control background */
+    --line:#e4dccb;         /* warm cream border */
+    --accent:#3b3a8c;       /* Civic Ink, primary action */
+    --accent-soft:#e9e7f5;  /* blue tint */
+    --gold:#b07d2b;         /* approvals, value */
+    --sage:#3f7d5e;         /* verified, healthy */
+    --muted:#5c5870;        /* muted blue-slate */
+    --shadow:0 1px 2px rgba(32,26,78,.06),0 8px 24px rgba(32,26,78,.10);
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{
-    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-family:"DM Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--ink);background:var(--paper);
     display:flex;flex-direction:column;height:100vh;overflow:hidden;
   }
 
   /* ---- top bar ---- */
   header{
-    flex:0 0 auto;background:var(--ink);color:#f6f3ec;
-    border-bottom:3px solid var(--accent);
+    flex:0 0 auto;background:var(--ink);color:#f6f2e9;
+    border-bottom:3px solid var(--gold);
   }
   .bar{
     display:flex;align-items:center;gap:18px;
     padding:10px 20px;max-width:1400px;margin:0 auto;
   }
   .brand{display:flex;align-items:center;gap:10px;cursor:pointer;flex:0 0 auto}
-  .brand .dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(31,107,79,.25)}
-  .brand b{font-size:15px;letter-spacing:.2px}
-  .brand span{font-size:12px;color:#a7b7ae;margin-left:2px}
+  .brand .dot{width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(176,125,43,.25)}
+  .brand b{font-family:"DM Serif Text",Georgia,serif;font-size:17px;letter-spacing:.2px;font-weight:400}
+  .brand span{font-size:12px;color:#b7b2d4;margin-left:2px}
   nav{display:flex;gap:4px;flex-wrap:wrap;overflow-x:auto}
   nav button{
-    font:inherit;font-size:13px;color:#cfd9d2;background:transparent;
+    font:inherit;font-size:13px;color:#cfccea;background:transparent;
     border:1px solid transparent;border-radius:8px;padding:7px 11px;cursor:pointer;
     white-space:nowrap;transition:.12s;
   }
-  nav button:hover{background:rgba(255,255,255,.08);color:#fff}
-  nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  nav button:hover{background:rgba(255,255,255,.10);color:#fff}
+  nav button.active{background:var(--gold);color:#241b05;border-color:var(--gold);font-weight:600}
 
   /* ---- stage ---- */
   main{flex:1 1 auto;position:relative;overflow:hidden}
@@ -54,42 +60,41 @@
   #home{position:absolute;inset:0;overflow:auto;padding:36px 20px 60px}
   #home.hide{display:none}
   .wrap{max-width:1180px;margin:0 auto}
-  .lede{max-width:720px;margin:0 0 30px}
-  .lede h1{font-size:28px;margin:0 0 8px;letter-spacing:-.3px}
-  .lede p{margin:0;color:var(--muted);font-size:15px;line-height:1.6}
+  .lede{max-width:730px;margin:0 0 30px}
+  .lede h1{font-family:"DM Serif Text",Georgia,serif;font-weight:400;font-size:30px;margin:0 0 10px;letter-spacing:-.2px}
+  .lede p{margin:0;color:var(--muted);font-size:15px;line-height:1.65}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:20px}
   .card{
     background:var(--card);border:1px solid var(--line);border-radius:14px;
     box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;
     transition:.15s;cursor:pointer;
   }
-  .card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(16,34,28,.08),0 14px 34px rgba(16,34,28,.14);border-color:#bcae92}
+  .card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(32,26,78,.08),0 14px 34px rgba(32,26,78,.16);border-color:var(--gold)}
   .card .top{padding:18px 18px 4px}
   .tag{
     display:inline-block;font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;
     color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:4px 10px;margin-bottom:10px;
   }
-  .card h3{margin:0 0 2px;font-size:18px;letter-spacing:-.2px}
-  .card .fmt{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+  .card h3{font-family:"DM Serif Text",Georgia,serif;font-weight:400;margin:0 0 2px;font-size:20px;letter-spacing:-.1px}
   .card .body{padding:0 18px 16px;flex:1 1 auto}
   .row{margin:10px 0}
-  .row .lab{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#8a9389;margin:0 0 2px}
-  .row .val{font-size:13.5px;line-height:1.5;color:#283530;margin:0}
+  .row .lab{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#8a85a0;margin:0 0 2px}
+  .row .val{font-size:13.5px;line-height:1.55;color:#2c2850;margin:0}
   .card .foot{
     padding:12px 18px;border-top:1px solid var(--line);
-    display:flex;align-items:center;justify-content:space-between;background:#fbfaf6;
+    display:flex;align-items:center;justify-content:space-between;background:#f7f3ea;
   }
   .card .foot .open{font-size:13px;font-weight:600;color:var(--accent)}
   .card .foot .arrow{color:var(--accent);font-size:16px;transition:.15s}
   .card:hover .foot .arrow{transform:translateX(4px)}
-  footer.note{max-width:1180px;margin:34px auto 0;color:#97a096;font-size:12.5px;line-height:1.6}
+  footer.note{max-width:1180px;margin:34px auto 0;color:#938ea8;font-size:12.5px;line-height:1.6}
 
-  /* ---- in-frame back strip (only visible when a demo is open) ---- */
+  /* ---- in-frame back strip ---- */
   .hint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
-    background:var(--ink);color:#f6f3ec;font-size:12.5px;padding:8px 14px;border-radius:999px;
+    background:var(--ink);color:#f6f2e9;font-size:12.5px;padding:8px 14px;border-radius:999px;
     box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.2s;z-index:30}
-  .hint.show{opacity:.92}
-  @media (max-width:560px){.brand span{display:none}.lede h1{font-size:23px}}
+  .hint.show{opacity:.94}
+  @media (max-width:560px){.brand span{display:none}.lede h1{font-size:25px}}
 </style>
 </head>
 <body>
@@ -108,7 +113,7 @@
     <div class="wrap">
       <div class="lede">
         <h1>One story, told nine ways</h1>
-        <p>Nine explainers for the two Civic-Chain products — the one that <em>decides</em> spending
+        <p>Nine explainers for the two Civic-Chain products, the one that <em>decides</em> spending
            and the one that <em>proves</em> it. Each uses a different format tuned to a different room.
            Pick one from the menu above, or open a card to see what it is, who it's for, and what it shows best.</p>
       </div>
@@ -139,7 +144,7 @@
       file:"demos/product-flow.html",
       title:"Product Flow",
       format:"Service blueprint",
-      what:"How the two products hand off to each other — what the resident sees, what staff do, and what the system does, with the shared verification layer underneath as the support row.",
+      what:"How the two products hand off to each other: what the resident sees, what staff do, and what the system does, with the shared verification layer underneath as the support row.",
       who:"Product, design and ops teams",
       shows:"Where one product decides spending and the other proves it, and how they work better together."
     },
@@ -148,25 +153,25 @@
       file:"demos/winter-roads-swimlane.html",
       title:"Winter Roads Swimlane",
       format:"Swimlane",
-      what:"Who does what, from budget line to proof — lanes for the steps Civic-Chain runs itself, the hand-offs between products, and what the resident needs, worked through a winter road-maintenance scenario.",
+      what:"Who does what, from budget line to proof, with lanes for the steps Civic-Chain runs itself, the hand-offs between products, and what the resident needs, worked through a winter road-maintenance scenario.",
       who:"Implementation and onboarding",
-      shows:"The precise ownership and sequencing of each step — great for detail, built around a single concrete scenario."
+      shows:"The precise ownership and sequencing of each step, great for detail, built around a single concrete scenario."
     },
     {
       id:"product-overlap",
       file:"demos/product-overlap.html",
       title:"Product Overlap",
       format:"Venn / overlap diagram",
-      what:"Two jobs — running a fair purchase and publishing the books — resting on one shared standard of proof. What's unique to each and what they hold in common, at a glance.",
+      what:"Two jobs, running a fair purchase and publishing the books, resting on one shared standard of proof. What's unique to each and what they hold in common, at a glance.",
       who:"Slide openers, quick pitches",
-      shows:"The shared foundation between the two products, fast — simple, but it doesn't show flow or value."
+      shows:"The shared foundation between the two products, fast. Simple, but it doesn't show flow or value."
     },
     {
       id:"platform-stack",
       file:"demos/platform-stack.html",
       title:"Platform Stack",
       format:"Layer cake / stack",
-      what:"Built from the proof up: a shared foundation — the same rules in both products, fingerprints on a public blockchain — with Procurement and the Transparency Ledger as modules on top.",
+      what:"Built from the proof up: a shared foundation, the same rules in both products and fingerprints on a public blockchain, with Procurement and the Transparency Ledger as modules on top.",
       who:"Investors, technical buyers",
       shows:"The shared architecture under both products, and why you can start with either one with nothing to replace."
     },
@@ -175,7 +180,7 @@
       file:"demos/capability-map.html",
       title:"Capability Map",
       format:"Comparison matrix",
-      what:"The two products side by side, capability by capability: buy fairly and award with confidence, versus show residents the books and prove they're real — plus where they work better together.",
+      what:"The two products side by side, capability by capability: buy fairly and award with confidence, versus show residents the books and prove they're real, plus where they work better together.",
       who:"Procurement officers comparing options",
       shows:"A feature-by-feature comparison that answers 'which product does what?'"
     },
@@ -184,7 +189,7 @@
       file:"demos/persona-journeys.html",
       title:"Persona Journeys",
       format:"Persona journey map",
-      what:"Three people around one public dollar — Dot the resident, Marco the vendor, and Ruth the finance director — walked through their day before and after, with pain points marked.",
+      what:"Three people around one public dollar, Dot the resident, Marco the vendor, and Ruth the finance director, walked through their day before and after, with pain points marked.",
       who:"Sales, marketing",
       shows:"The human payoff for each role, grounded in a concrete before-and-after."
     },
@@ -195,16 +200,16 @@
       format:"Storyboard / comic strip",
       what:"A short panel scenario: a suspicious 3 a.m. fuel charge, and how a resident (or clerk) checks it and gets a straight answer. Civic scenes and stamps carry the story.",
       who:"Public-facing pages, town meetings",
-      shows:"A real, relatable moment where the system earns trust — made to be read in seconds."
+      shows:"A real, relatable moment where the system earns trust, made to be read in seconds."
     },
     {
       id:"simplified-comic",
       file:"demos/simplified-comic.html",
       title:"Who's Checking?",
       format:"Storyboard / comic strip (simplified)",
-      what:"A stripped-down comic that poses one question — who's checking this? — and answers it in a few panels. The leaner cousin of 'The 3 a.m. Fuel Charge.'",
+      what:"A stripped-down comic that poses one question, who's checking this, and answers it in a few panels. The leaner cousin of 'The 3 a.m. Fuel Charge.'",
       who:"Public-facing pages, town meetings",
-      shows:"The trust payoff in the fewest possible panels — ideal when attention is short."
+      shows:"The trust payoff in the fewest possible panels, ideal when attention is short."
     }
   ];
 
@@ -259,7 +264,7 @@
     hint.classList.add('show');
     setActive(id);
     location.hash = id;
-    document.title = d.title + ' — Civic-Chain Explainers';
+    document.title = d.title + ' · Civic-Chain Explainers';
   }
 
   function setActive(id){
