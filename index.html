@@ -143,11 +143,11 @@
   <section id="home">
     <div class="wrap">
       <div class="lede">
-        <h1>One story, told ten ways</h1>
-        <p>Ten views of the two Civic-Chain products, the one that <em>decides</em> spending
-           and the one that <em>proves</em> it. Nine are plain-language explainers, each tuned to a
-           different room; the tenth is the full system data-flow, kept behind a password for technical review.
-           Pick one from the menu above, or open a card to see what it is, who it's for, and what it shows best.</p>
+        <h1>One story, told nine ways</h1>
+        <p>Nine views of the two Civic-Chain products, the one that <em>decides</em> spending
+           and the one that <em>proves</em> it. Each is a plain-language explainer, tuned to a
+           different room. Pick one from the menu above, or open a card to see what it is, who it's for,
+           and what it shows best.</p>
       </div>
       <div class="grid" id="grid"></div>
       <footer class="note">
@@ -269,6 +269,20 @@
       title:"Two Rails, One Meter",
       format:"System data-flow",
       gated:true,
+      unlisted:true,
+      pass:"faisonlawgroup",
+      what:"The whole platform in one picture: public money moves on one rail, the public record on another, they meet only at a shared anchor relay, and a single meter bills only confirmed on-chain records. Seven figures trace funding, budgeting, the card, the vendor payout, TLaaS ingestion, the signing wallets, and where metering actually fires.",
+      who:"Engineering, technical diligence, counsel",
+      shows:"Exactly how value and record stay separate, what each hop posts to which book, and the one billable unit in the whole system."
+    },
+    {
+      id:"two-rails-one-meter-hc",
+      file:"demos/two-rails-one-meter-hc.html",
+      title:"Two Rails, One Meter",
+      format:"System data-flow",
+      gated:true,
+      unlisted:true,
+      pass:"hudsoncook",
       what:"The whole platform in one picture: public money moves on one rail, the public record on another, they meet only at a shared anchor relay, and a single meter bills only confirmed on-chain records. Seven figures trace funding, budgeting, the card, the vendor payout, TLaaS ingestion, the signing wallets, and where metering actually fires.",
       who:"Engineering, technical diligence, counsel",
       shows:"Exactly how value and record stay separate, what each hop posts to which book, and the one billable unit in the whole system."
@@ -286,6 +300,7 @@
   homeBtn.onclick = ()=>go('home');
   nav.appendChild(homeBtn);
   demos.forEach(d=>{
+    if(d.unlisted) return;              // unlisted: reachable only by direct link
     const b = el('button', d.title);
     b.dataset.id = d.id;
     if(d.gated) b.classList.add('gated');
@@ -295,6 +310,7 @@
 
   // build cards
   demos.forEach(d=>{
+    if(d.unlisted) return;              // unlisted: no gallery card
     const card = el('div'); card.className='card'; card.onclick=()=>go(d.id);
     card.innerHTML = `
       <div class="top">
@@ -332,7 +348,7 @@
   }
 
   /* ---- password gate (client-side; keeps the explainer off casual view) ---- */
-  const GATE_PASS = 'faisonlawgroup';
+  /* each gated demo carries its own `pass`, so different reviewers get their own credential */
   const unlocked = new Set(
     (sessionStorage.getItem('cc_unlocked') || '').split(',').filter(Boolean)
   );
@@ -359,7 +375,8 @@
   }
   gateForm.addEventListener('submit', e=>{
     e.preventDefault();
-    if(gatePass.value === GATE_PASS){
+    const pd = demos.find(x=>x.id===pendingGateId);
+    if(pd && gatePass.value === pd.pass){
       const id = pendingGateId;
       unlocked.add(id);
       sessionStorage.setItem('cc_unlocked', [...unlocked].join(','));

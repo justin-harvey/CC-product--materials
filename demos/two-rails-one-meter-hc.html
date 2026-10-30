@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Two Rails, One Meter · Civic-Chain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   Tokens lifted from frontend/src/styles.css — the Civic-Chain
+   OKLCH ramps. gold = money/value. green(sage) = verified public
+   record. blue = civic ink. orange = watch. slate = muted purple.
+   ───────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   Business-professional palette. Deep navy ink on a cool paper
+   ground; forest green carries VALUE, steel blue carries RECORD.
+   IBM Plex throughout — serif for display, sans for text, mono
+   for the identifiers this document is mostly made of.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --ink:#101d2e; --ink-2:#26394f; --ink-3:#405871;
+  --money:#14563d; --money-2:#1d7a55; --money-bg:#e9f2ee; --money-br:#8fc0aa;
+  --rec:#1b4a72;   --rec-2:#2a6ba0;  --rec-bg:#e8eff6;   --rec-br:#93b6d3;
+  --alert:#8a4718; --alert-bg:#f7ede4;
+  --paper:#f6f7f9; --card:#ffffff; --sunk:#eef1f5;
+  --muted:#55616f; --muted-2:#5f6b7a;
+  --rule:#e1e5ea; --rule-2:#cbd2da;
+  --shadow:0 1px 2px rgba(16,29,46,.06), 0 6px 18px -10px rgba(16,29,46,.20);
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#e6ecf3; --ink-2:#c5d0dc; --ink-3:#9cabbd;
+    --money:#6ecfa4; --money-2:#4cb185; --money-bg:#102a20; --money-br:#2f6349;
+    --rec:#7cb8e8;   --rec-2:#5596cc;  --rec-bg:#102436;   --rec-br:#2d5778;
+    --alert:#e0a172; --alert-bg:#2e1e11;
+    --paper:#0d141d; --card:#141d28; --sunk:#1a2430;
+    --muted:#93a2b3; --muted-2:#8794a5;
+    --rule:#243040; --rule-2:#34424f;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 8px 24px -12px rgba(0,0,0,.75);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#e6ecf3; --ink-2:#c5d0dc; --ink-3:#9cabbd;
+  --money:#6ecfa4; --money-2:#4cb185; --money-bg:#102a20; --money-br:#2f6349;
+  --rec:#7cb8e8;   --rec-2:#5596cc;  --rec-bg:#102436;   --rec-br:#2d5778;
+  --alert:#e0a172; --alert-bg:#2e1e11;
+  --paper:#0d141d; --card:#141d28; --sunk:#1a2430;
+  --muted:#93a2b3; --muted-2:#8794a5;
+  --rule:#243040; --rule-2:#34424f;
+  --shadow:0 1px 2px rgba(0,0,0,.45), 0 8px 24px -12px rgba(0,0,0,.75);
+}
+
+*{box-sizing:border-box}
+body{background:var(--paper); color:var(--ink); font-family:var(--sans);
+     font-size:15px; line-height:1.6; margin:0; -webkit-font-smoothing:antialiased}
+.wrap{max-width:1280px; margin:0 auto; padding:40px 28px 96px}
+@media(max-width:640px){.wrap{padding:28px 16px 64px}}
+
+/* ── masthead ─────────────────────────────────────────────── */
+.mast{border-bottom:2px solid var(--ink); padding-bottom:20px; margin-bottom:8px}
+.eyebrow{font:500 11px/1.4 var(--sans); letter-spacing:.16em; text-transform:uppercase;
+         color:var(--muted); margin:0 0 14px}
+h1{font:400 clamp(34px,5.4vw,54px)/1.06 var(--serif); margin:0 0 14px; text-wrap:balance;
+   letter-spacing:-.01em}
+.dek{font-size:17px; line-height:1.55; color:var(--ink-2); max-width:68ch; margin:0}
+.dek b{color:var(--ink); font-weight:500}
+.mast-meta{display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:18px;
+           font:500 11.5px/1 var(--mono); color:var(--muted); letter-spacing:.02em}
+
+/* ── section ──────────────────────────────────────────────── */
+section{margin-top:56px}
+h2{font:400 clamp(22px,3vw,30px)/1.15 var(--serif); margin:0 0 6px; text-wrap:balance}
+h3{font:500 14px/1.3 var(--sans); letter-spacing:.10em; text-transform:uppercase;
+   color:var(--muted); margin:34px 0 12px}
+.lede{color:var(--ink-2); max-width:74ch; margin:0 0 22px}
+p{max-width:74ch}
+code,.m{font-family:var(--mono); font-size:.88em; background:var(--sunk);
+        padding:1px 5px; border-radius:3px; color:var(--ink-2);
+        border:1px solid var(--rule)}
+
+/* ── figures ──────────────────────────────────────────────── */
+figure{margin:0 0 8px}
+.fig-shell{background:var(--card); border:1px solid var(--rule-2); border-radius:8px;
+           box-shadow:var(--shadow); overflow-x:auto; padding:8px}
+.fig-shell svg{display:block; min-width:900px; width:100%; height:auto}
+figcaption{font-size:13.5px; line-height:1.55; color:var(--muted); margin-top:12px;
+           max-width:82ch}
+figcaption b{color:var(--ink-2); font-weight:500}
+
+/* svg text roles */
+.t-node{font:500 12.5px var(--sans)}
+.t-sub{font:400 10.5px var(--mono)}
+.t-arrow{font:500 10px var(--mono); letter-spacing:.01em}
+.t-lane{font:700 10.5px var(--sans); letter-spacing:.14em; text-transform:uppercase}
+.t-panel{font:500 12px var(--sans); letter-spacing:.06em; text-transform:uppercase}
+.t-num{font:700 11px var(--mono)}
+
+/* ── legend ───────────────────────────────────────────────── */
+.legend{display:flex; flex-wrap:wrap; gap:10px 26px; margin:18px 0 0; padding:14px 16px;
+        background:var(--sunk); border:1px solid var(--rule); border-radius:6px;
+        font-size:12.5px; color:var(--ink-2)}
+.legend div{display:flex; align-items:center; gap:9px}
+.legend svg{flex:none}
+
+/* ── tables ───────────────────────────────────────────────── */
+.tbl-shell{overflow-x:auto; border:1px solid var(--rule-2); border-radius:8px;
+           background:var(--card); box-shadow:var(--shadow)}
+table{border-collapse:collapse; width:100%; min-width:660px; font-size:13.5px}
+th{font:700 10.5px/1.3 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+   color:var(--muted); text-align:left; padding:12px 14px; background:var(--sunk);
+   border-bottom:1px solid var(--rule-2); white-space:nowrap; vertical-align:bottom}
+td{padding:11px 14px; border-bottom:1px solid var(--rule); vertical-align:top;
+   line-height:1.45}
+tbody tr:last-child td{border-bottom:none}
+td.n{font-variant-numeric:tabular-nums; white-space:nowrap}
+td .m{white-space:nowrap}
+.yes{color:var(--rec); font-weight:700}
+.no{color:var(--muted-2); font-weight:700}
+.mkr{display:inline-flex; align-items:center; justify-content:center;
+     width:20px; height:20px; border-radius:50%; font:700 10px var(--mono);
+     background:var(--money-bg); color:var(--money); border:1px solid var(--money-br)}
+.mkr.rec{background:var(--rec-bg); color:var(--rec); border-color:var(--rec-br)}
+
+/* ── callouts ─────────────────────────────────────────────── */
+.note{border-left:3px solid var(--alert); background:var(--alert-bg); padding:14px 18px;
+      border-radius:0 6px 6px 0; margin:22px 0; font-size:14px; color:var(--ink-2)}
+.note b{color:var(--ink)}
+.note.money{border-left-color:var(--money-2); background:var(--money-bg)}
+.note.rec{border-left-color:var(--rec-2); background:var(--rec-bg)}
+
+/* ── two-up ───────────────────────────────────────────────── */
+.duo{display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:18px;
+     margin-top:20px}
+.panel{background:var(--card); border:1px solid var(--rule-2); border-radius:8px;
+       padding:18px 20px; box-shadow:var(--shadow)}
+.panel h4{font:500 11px/1.3 var(--sans); letter-spacing:.13em; text-transform:uppercase;
+          margin:0 0 12px; color:var(--muted)}
+.panel.gold{border-top:3px solid var(--money-2)}
+.panel.sage{border-top:3px solid var(--rec-2)}
+.panel ul{margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-2)}
+.panel li{margin:7px 0}
+.panel li::marker{color:var(--muted-2)}
+
+/* account chips */
+.acct{font:500 11px var(--mono); background:var(--sunk); border:1px solid var(--rule-2);
+      border-radius:3px; padding:2px 6px; color:var(--ink-2); display:inline-block;
+      margin:2px 3px 2px 0; white-space:nowrap}
+.acct.l{border-left:3px solid var(--money-2)}
+.acct.a{border-left:3px solid var(--ink-3)}
+.acct.r{border-left:3px solid var(--rec-2)}
+
+footer{margin-top:64px; padding-top:20px; border-top:1px solid var(--rule);
+        font-size:12.5px; color:var(--muted-2); display:flex; flex-wrap:wrap;
+        gap:6px 20px; font-family:var(--mono)}
+a{color:var(--ink-3)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+:focus-visible{outline:2px solid var(--money-2); outline-offset:2px}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Civic-Chain · System data-flow</p>
+  <h1>Two Rails, One Meter</h1>
+  <p class="dek">Public money moves on one rail; the public record moves on another. They share a
+  single blockchain relay and a single meter — and the meter counts
+  <b>only the record</b>. Not one cent of the money that crosses this diagram is billable.</p>
+  <div class="mast-meta">
+    <span>DEFAULT_LEDGER=polygon</span>
+    <span>BILLING_ENABLED default false</span>
+    <span>billable unit = 1 validated on-chain write</span>
+    <span style="color:var(--alert)">yield pass-through: proposed</span>
+  </div>
+</header>
+
+<section>
+  <h2>The whole system, one picture</h2>
+  <p class="lede">Two products share one spine. <b>Above the spine</b>, dollars move through Modern
+  Treasury and two ledgers, ending in a vendor's bank account. <b>Below it</b>, records move — bank
+  files, notices, filings — and no money moves at all. Both hand work to the same anchor relay, and
+  the meter sits at the far end of that relay, counting confirmed writes.</p>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 1200 610" role="img" preserveAspectRatio="xMidYMid meet" aria-label="Money flows left to right along a top rail from a municipality bank through Modern Treasury, a municipal escrow balance, a solicitation budget, award and work completion, a vendor payout, and into a vendor bank account. A middle band holds the two ledgers on the left and the shared anchor relay, chain confirmation and meter on the right. A bottom rail carries the transparency product: accounts-payable data sources are parsed, normalized and folded into a per-account hash chain, while civic messages and form broadcasts are signed by the owner wallet. Both bottom rails feed the shared relay. The meter fires once, after chain confirmation, and only for record writes; the vendor payout attestation is drawn dashed because it is not billable.">
+        <defs>
+          <marker id="ah-g" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--money-2)"></polygon></marker>
+          <marker id="ah-s" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--rec-2)"></polygon></marker>
+          <marker id="ah-i" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--ink-3)"></polygon></marker>
+          <marker id="ah-m" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--muted-2)"></polygon></marker>
+        </defs>
+
+        <!-- ══ LANE 1 · MONEY ══ -->
+        <text class="t-lane" x="20" y="58" fill="var(--money)">1 · Procurement &amp; payouts — money moves</text>
+        <text class="t-arrow" x="1180" y="58" fill="var(--muted-2)" text-anchor="end">green = value</text>
+
+        <g fill="var(--money-bg)" stroke="var(--money-br)" stroke-width="1.5">
+          <rect x="20" y="76" width="142" height="64" rx="5"></rect>
+          <rect x="188" y="76" width="150" height="64" rx="5"></rect>
+          <rect x="364" y="76" width="150" height="64" rx="5"></rect>
+          <rect x="540" y="76" width="150" height="64" rx="5"></rect>
+          <rect x="716" y="76" width="150" height="64" rx="5"></rect>
+          <rect x="892" y="76" width="150" height="64" rx="5"></rect>
+          <rect x="1068" y="76" width="112" height="64" rx="5"></rect>
+        </g>
+        <g class="t-node" fill="var(--money)" text-anchor="middle">
+          <text x="91" y="102">Municipality bank</text>
+          <text x="263" y="102">Modern Treasury</text>
+          <text x="439" y="102">Municipal escrow</text>
+          <text x="615" y="102">Solicitation budget</text>
+          <text x="791" y="102">Spend &amp; completion</text>
+          <text x="967" y="102">Vendor payout</text>
+          <text x="1124" y="102">Vendor bank</text>
+        </g>
+        <g class="t-sub" fill="var(--money-2)" text-anchor="middle">
+          <text x="91" y="120">demand deposit</text>
+          <text x="263" y="120">pull-debit or push</text>
+          <text x="439" y="120">reusable · earns yield</text>
+          <text x="615" y="120">drains 2 ways</text>
+          <text x="791" y="120">cards · OCDS releases</text>
+          <text x="967" y="120">MT off-ramp</text>
+          <text x="1124" y="120">ACH / wire</text>
+        </g>
+
+        <g stroke="var(--money-2)" stroke-width="2" marker-end="url(#ah-g)" fill="none">
+          <line x1="162" y1="108" x2="186" y2="108"></line>
+          <line x1="338" y1="108" x2="362" y2="108"></line>
+          <line x1="514" y1="108" x2="538" y2="108"></line>
+          <line x1="690" y1="108" x2="714" y2="108"></line>
+          <line x1="866" y1="108" x2="890" y2="108"></line>
+          <line x1="1042" y1="108" x2="1066" y2="108"></line>
+        </g>
+
+        <!-- money → ledgers -->
+        <g stroke="var(--money-2)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ah-g)" fill="none">
+          <line x1="263" y1="140" x2="263" y2="214"></line>
+          <line x1="439" y1="140" x2="439" y2="214"></line>
+          <line x1="615" y1="140" x2="615" y2="214"></line>
+        </g>
+        <rect x="268" y="166" width="342" height="16" fill="var(--card)"></rect>
+        <text class="t-arrow" x="439" y="178" fill="var(--money-2)" text-anchor="middle">the on-ramp posts to both books · the earmark to MT only</text>
+
+        <!-- money → relay -->
+        <line x1="791" y1="140" x2="791" y2="214" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ah-i)"></line>
+        <rect x="712" y="160" width="158" height="15" fill="var(--card)"></rect>
+        <text class="t-arrow" x="791" y="171" fill="var(--ink-3)" text-anchor="middle">ocds_contract · ocds_wcr</text>
+
+        <line x1="967" y1="140" x2="967" y2="214" stroke="var(--muted-2)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ah-m)"></line>
+        <rect x="884" y="184" width="166" height="15" fill="var(--card)"></rect>
+        <text class="t-arrow" x="967" y="195" fill="var(--muted-2)" text-anchor="middle">project_payout — not billed</text>
+
+        <!-- ══ MIDDLE · LEDGERS ══ -->
+        <rect x="20" y="216" width="670" height="184" rx="7" fill="var(--sunk)" stroke="var(--rule-2)" stroke-width="1.5"></rect>
+        <text class="t-panel" x="36" y="240" fill="var(--ink-2)">The two ledgers</text>
+        <text class="t-arrow" x="674" y="240" fill="var(--muted-2)" text-anchor="end">money lives here — and only here</text>
+
+        <rect x="36" y="252" width="310" height="134" rx="5" fill="var(--card)" stroke="var(--rule-2)"></rect>
+        <text class="t-node" x="52" y="274" fill="var(--ink)">Modern Treasury ledger</text>
+        <text class="t-sub" x="52" y="290" fill="var(--muted)">where the cash sits — MT owns the balance</text>
+        <g class="t-sub" fill="var(--ink-3)">
+          <text x="52" y="312">custody_usd  ·  fee_revenue</text>
+          <text x="52" y="330">escrow (per municipality)</text>
+          <text x="52" y="348">earmark · vendor_payable</text>
+          <text x="52" y="366">resolved by ROLE, from a registry</text>
+        </g>
+
+        <rect x="364" y="252" width="310" height="134" rx="5" fill="var(--card)" stroke="var(--rule-2)"></rect>
+        <text class="t-node" x="380" y="274" fill="var(--ink)">Bridge double-entry</text>
+        <text class="t-sub" x="380" y="290" fill="var(--muted)">counterparty balances — who it belongs to</text>
+        <g class="t-sub" fill="var(--ink-3)">
+          <text x="380" y="312">ASSET_MT_CLEARING_USD</text>
+          <text x="380" y="330">LIAB_MUNI_ESCROW_USD</text>
+          <text x="380" y="348">LIAB_VENDOR_USDC_OBLIGATION</text>
+        </g>
+        <text class="t-sub" x="380" y="366" fill="var(--money)">REV_CIVIC_FEE_USD  ← metered revenue</text>
+
+        <!-- ══ MIDDLE · RELAY + METER ══ -->
+        <rect x="716" y="216" width="464" height="184" rx="7" fill="var(--sunk)" stroke="var(--ink-3)" stroke-width="1.5"></rect>
+        <text class="t-panel" x="732" y="240" fill="var(--ink)">Shared spine</text>
+        <text class="t-arrow" x="1164" y="240" fill="var(--muted-2)" text-anchor="end">both rails end here</text>
+
+        <g fill="var(--card)" stroke="var(--rule-2)">
+          <rect x="732" y="252" width="136" height="82" rx="5"></rect>
+          <rect x="880" y="252" width="136" height="82" rx="5"></rect>
+          <rect x="1028" y="252" width="136" height="82" rx="5"></rect>
+        </g>
+        <g class="t-node" text-anchor="middle" fill="var(--ink)">
+          <text x="800" y="274">Anchor relay</text>
+          <text x="948" y="274">Chain confirms</text>
+          <text x="1096" y="274">The meter</text>
+        </g>
+        <g class="t-sub" text-anchor="middle" fill="var(--muted)">
+          <text x="800" y="292">outbox → claim</text>
+          <text x="800" y="308">CAS → sign</text>
+          <text x="800" y="324">→ broadcast</text>
+          <text x="948" y="292">polygon · stellar</text>
+          <text x="948" y="308">xrpl · solana</text>
+          <text x="948" y="324">status: validated</text>
+          <text x="1096" y="292">fires once, here</text>
+          <text x="1096" y="324">idempotent</text>
+        </g>
+        <text class="t-sub" x="1096" y="308" text-anchor="middle" fill="var(--money)">+1 billable write</text>
+        <g stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ah-i)" fill="none">
+          <line x1="868" y1="293" x2="878" y2="293"></line>
+          <line x1="1016" y1="293" x2="1026" y2="293"></line>
+        </g>
+        <rect x="732" y="348" width="432" height="38" rx="5" fill="var(--money-bg)" stroke="var(--money-br)"></rect>
+        <text class="t-node" x="948" y="366" text-anchor="middle" fill="var(--money)">invoice  =  base_fee  +  write_charges</text>
+        <text class="t-sub" x="948" y="380" text-anchor="middle" fill="var(--money-2)">flat $0.10 per write · minus the tier's included allowance</text>
+
+        <!-- ══ LANE 2 · RECORD ══ -->
+        <text class="t-lane" x="20" y="434" fill="var(--rec)">2 · Transparency ledger (TLaaS) — records move, money does not</text>
+        <text class="t-arrow" x="1180" y="434" fill="var(--muted-2)" text-anchor="end">blue = public record</text>
+
+        <g fill="var(--rec-bg)" stroke="var(--rec-br)" stroke-width="1.5">
+          <rect x="20" y="452" width="142" height="56" rx="5"></rect>
+          <rect x="188" y="452" width="150" height="56" rx="5"></rect>
+          <rect x="364" y="452" width="150" height="56" rx="5"></rect>
+          <rect x="20" y="524" width="142" height="56" rx="5"></rect>
+          <rect x="188" y="524" width="326" height="56" rx="5"></rect>
+        </g>
+        <g class="t-node" fill="var(--rec)" text-anchor="middle">
+          <text x="91" y="476">AP data sources</text>
+          <text x="263" y="476">Parse &amp; normalize</text>
+          <text x="439" y="476">Per-account chain</text>
+          <text x="91" y="548">Civic messages</text>
+          <text x="351" y="548">Owner wallet signs the post</text>
+        </g>
+        <g class="t-sub" fill="var(--rec-2)" text-anchor="middle">
+          <text x="91" y="494">webhook·file·API·SFTP</text>
+          <text x="263" y="494">CSV·JSON·ISO 20022</text>
+          <text x="439" y="494">SHA-256 · dedup</text>
+          <text x="91" y="566">notices · form filings</text>
+          <text x="351" y="566">the town's own key — never the platform's</text>
+        </g>
+        <g stroke="var(--rec-2)" stroke-width="2" marker-end="url(#ah-s)" fill="none">
+          <line x1="162" y1="480" x2="186" y2="480"></line>
+          <line x1="338" y1="480" x2="362" y2="480"></line>
+          <line x1="162" y1="552" x2="186" y2="552"></line>
+        </g>
+
+        <!-- record → relay -->
+        <g stroke="var(--rec-2)" stroke-width="2" fill="none" marker-end="url(#ah-s)">
+          <path d="M 514 480 L 752 480 L 752 404"></path>
+          <path d="M 514 552 L 880 552 L 880 404"></path>
+        </g>
+        <text class="t-arrow" x="632" y="470" fill="var(--rec-2)" text-anchor="middle">ap_anchor · plaid_anchor</text>
+        <text class="t-arrow" x="700" y="542" fill="var(--rec-2)" text-anchor="middle">civic_message · civic_form · enterprise_memo</text>
+
+        <!-- the absent path, stated -->
+        <text class="t-arrow" x="20" y="600" fill="var(--muted-2)">Note the arrow that is not drawn: nothing on rail 2 reaches the ledgers. TLaaS produces a record and a bill, never a balance.</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 1 — the whole system.</b> The money rail and the record rail never touch
+    each other; they meet only at the anchor relay, and only as records. The meter is the last box
+    on the spine because metering fires at <span class="m">validated</span> — after the chain
+    confirms — never at submit. The dashed drop from <b>Vendor payout</b> is the one place the two
+    ideas cross: a payout does emit an on-chain attestation, and that attestation is deliberately
+    not billable. A solicitation budget has <b>two</b> drains, not one — a purchase card spent
+    against the project, and the payout at the end (Figures&nbsp;4 and&nbsp;5). Card settlement
+    anchors too, and is likewise excluded from the meter.</figcaption>
+  </figure>
+
+  <div class="legend">
+    <div><svg width="30" height="10" aria-hidden="true"><line x1="0" y1="5" x2="24" y2="5" stroke="var(--money-2)" stroke-width="2.5"></line><polygon points="24 1, 30 5, 24 9" fill="var(--money-2)"></polygon></svg> Value moves (real dollars or tokens)</div>
+    <div><svg width="30" height="10" aria-hidden="true"><line x1="0" y1="5" x2="24" y2="5" stroke="var(--rec-2)" stroke-width="2.5"></line><polygon points="24 1, 30 5, 24 9" fill="var(--rec-2)"></polygon></svg> Record moves (a hash, no value)</div>
+    <div><svg width="30" height="10" aria-hidden="true"><line x1="0" y1="5" x2="24" y2="5" stroke="var(--ink-3)" stroke-width="2.5"></line><polygon points="24 1, 30 5, 24 9" fill="var(--ink-3)"></polygon></svg> Billable write</div>
+    <div><svg width="30" height="10" aria-hidden="true"><line x1="0" y1="5" x2="24" y2="5" stroke="var(--muted-2)" stroke-width="1.5" stroke-dasharray="4 3"></line><polygon points="24 1, 30 5, 24 9" fill="var(--muted-2)"></polygon></svg> Excluded from billing by decision</div>
+  </div>
+</section>
+<section>
+  <h2>Rail 1, step one — getting a municipality's money in</h2>
+  <p class="lede">Modern Treasury is our payment processor, not our bank-in-a-box, and that has one
+  sharp consequence: <b>there are no virtual accounts</b>. A push payment lands on a shared
+  organization account carrying no tenant key at all. So an inbound dollar has to be told who it
+  belongs to, and there are only two honest ways to do that.</p>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 1000 300" role="img" preserveAspectRatio="xMidYMid meet" aria-label="Two inbound paths. A pull-debit that we originate carries its attribution inherently, because we chose whom to debit, and credits the owner&#39;s escrow directly. A push payment lands on a shared organization account with no tenant key and must pass an attribution test against the account it was sent from. Exactly one active, approved and verified registered account auto-credits. Zero matches, several owners, or an unverified registration go to a civic-admin queue for manual attribution.">
+        <defs>
+          <marker id="i-g" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--money-2)"></polygon></marker>
+          <marker id="i-o" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--alert)"></polygon></marker>
+        </defs>
+
+        <rect x="20" y="56" width="190" height="64" rx="5" fill="var(--money-bg)" stroke="var(--money-br)" stroke-width="1.5"></rect>
+        <text class="t-node" x="115" y="80" text-anchor="middle" fill="var(--money)">Pull-debit</text>
+        <text class="t-sub" x="115" y="98" text-anchor="middle" fill="var(--money-2)">we originate the ACH</text>
+        <text class="t-sub" x="115" y="112" text-anchor="middle" fill="var(--muted)">the town authorizes it</text>
+
+        <rect x="20" y="176" width="190" height="64" rx="5" fill="var(--money-bg)" stroke="var(--money-br)" stroke-width="1.5"></rect>
+        <text class="t-node" x="115" y="200" text-anchor="middle" fill="var(--money)">Attributed push</text>
+        <text class="t-sub" x="115" y="218" text-anchor="middle" fill="var(--money-2)">they send to us</text>
+        <text class="t-sub" x="115" y="232" text-anchor="middle" fill="var(--muted)">no tenant key on it</text>
+
+        <rect x="280" y="146" width="220" height="124" rx="6" fill="var(--sunk)" stroke="var(--ink-3)" stroke-width="1.5"></rect>
+        <text class="t-node" x="390" y="172" text-anchor="middle" fill="var(--ink)">Attribution test</text>
+        <text class="t-sub" x="390" y="192" text-anchor="middle" fill="var(--muted)">match the account it</text>
+        <text class="t-sub" x="390" y="206" text-anchor="middle" fill="var(--muted)">was sent FROM</text>
+        <text class="t-sub" x="390" y="228" text-anchor="middle" fill="var(--ink-3)">routing no. in full</text>
+        <text class="t-sub" x="390" y="242" text-anchor="middle" fill="var(--ink-3)">account masked</text>
+        <text class="t-sub" x="390" y="260" text-anchor="middle" fill="var(--muted-2)">last-4 is a prefilter only</text>
+
+        <rect x="570" y="56" width="210" height="64" rx="5" fill="var(--money-bg)" stroke="var(--money-2)" stroke-width="2"></rect>
+        <text class="t-node" x="675" y="80" text-anchor="middle" fill="var(--money)">Credited automatically</text>
+        <text class="t-sub" x="675" y="98" text-anchor="middle" fill="var(--money-2)">exactly one match, and it is</text>
+        <text class="t-sub" x="675" y="112" text-anchor="middle" fill="var(--money-2)">active + approved + verified</text>
+
+        <rect x="570" y="196" width="210" height="64" rx="5" fill="var(--alert-bg)" stroke="var(--alert)" stroke-width="1.5"></rect>
+        <text class="t-node" x="675" y="220" text-anchor="middle" fill="var(--alert)">Civic-admin queue</text>
+        <text class="t-sub" x="675" y="238" text-anchor="middle" fill="var(--alert)">0 matches · 2+ owners</text>
+        <text class="t-sub" x="675" y="252" text-anchor="middle" fill="var(--alert)">· unverified registration</text>
+
+        <rect x="830" y="120" width="150" height="72" rx="5" fill="var(--card)" stroke="var(--money-br)" stroke-width="1.5"></rect>
+        <text class="t-node" x="905" y="146" text-anchor="middle" fill="var(--ink)">Owner escrow</text>
+        <text class="t-sub" x="905" y="164" text-anchor="middle" fill="var(--muted)">the escrow account</text>
+        <text class="t-sub" x="905" y="180" text-anchor="middle" fill="var(--muted)">balance credited</text>
+
+        <g stroke="var(--money-2)" stroke-width="2" marker-end="url(#i-g)" fill="none">
+          <line x1="210" y1="88" x2="566" y2="88"></line>
+          <line x1="210" y1="208" x2="276" y2="208"></line>
+          <path d="M 500 186 L 534 186 L 534 88 L 566 88"></path>
+          <path d="M 780 88 L 806 88 L 806 140 L 828 140"></path>
+        </g>
+        <g stroke="var(--alert)" stroke-width="2" marker-end="url(#i-o)" fill="none">
+          <path d="M 500 230 L 534 230 L 534 228 L 566 228"></path>
+          <path d="M 780 228 L 806 228 L 806 172 L 828 172"></path>
+        </g>
+
+        <rect x="252" y="66" width="272" height="15" fill="var(--card)"></rect>
+        <text class="t-arrow" x="388" y="77" text-anchor="middle" fill="var(--money-2)">attribution is inherent — we chose the payer</text>
+        <text class="t-arrow" x="980" y="204" text-anchor="end" fill="var(--alert)">attributed by hand</text>
+        <text class="t-sub" x="20" y="284" fill="var(--muted-2)">Every attribution writes one row: the owner, auto or manual, which operator decided,</text>
+        <text class="t-sub" x="20" y="297" fill="var(--muted-2)">and the account that matched — unique per payment.</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 2 — ambiguity is queued, never guessed.</b> A push confirming
+    against exactly one registered account is credited on its own. Anything else — no match,
+    two owners with a claim, or a registration nobody has verified — goes to a human with the
+    near-miss and the reason attached. The system will not pick. The masked last-4 is only a
+    <em>prefilter</em>: the decision is made on the full routing number, and a candidate whose
+    sealed routing number cannot be opened is dropped rather than trusted. This applies to every
+    owner kind — vendors, enterprises and bare bridge users fund exactly the way a town does,
+    which is why non-municipal escrow books to its own journal line and cannot drift into the
+    municipal tie-out.</figcaption>
+  </figure>
+
+  <div class="note">
+    <b>As currently wired, the automatic path cannot fire.</b> The webhook handler builds its
+    incoming-payment record from seven fields and never fills in the originating routing number or
+    the masked account, and the matcher short-circuits to “no match” the moment either is
+    empty. The matcher itself is sound; the event that feeds it is thin. Until that is closed, every
+    push lands in the civic-admin queue — which fails safe, and looks exactly like a healthy
+    system with nothing to match.
+  </div>
+  <div class="note money">
+    <b>Two more things this rail does not do.</b> No <em>expected payment</em> objects are ever
+    created — reconciliation is driven entirely off incoming payment details. And Modern
+    Treasury does not automatically ledger a payment order just because an internal account is
+    linked to a ledger account; the only thing that ledgers a payment order is a ledger transaction
+    attached at creation, behind its own opt-in flag. With that flag off, the MT-side cash mirror
+    simply does not exist.
+  </div>
+</section>
+<section>
+  <h2>Rail 1, step two — the solicitation budget</h2>
+  <p class="lede">Funding and budgeting are two different moves. <b>Fund</b> tops up a reusable
+  escrow that belongs to the town and outlives any one procurement. <b>Allocate</b> earmarks part of
+  it to a specific solicitation, and that earmark <em>is</em> the project's spending budget. Both
+  are pure ledger movements — no coin, no chain, no wallet.</p>
+
+  <div class="duo">
+    <div class="panel gold">
+      <h4>What allocating actually does</h4>
+      <ul>
+        <li><b>One</b> balance-locked Modern Treasury ledger transaction: debit the town's escrow,
+        credit the solicitation's earmark.</li>
+        <li><b>No bridge journal posting at all.</b> No coin moved and no dollar of backing changed
+        hands, so the accounting book has nothing to say.</li>
+        <li>The over-allocation gate belongs to MT, not to us — the debit carries an
+        available-balance condition and MT rejects it atomically. Two concurrent awards cannot both
+        win.</li>
+        <li>The escrow is reusable and per-town; the earmark is per-solicitation. One funding can
+        back many procurements.</li>
+      </ul>
+    </div>
+    <div class="panel gold">
+      <h4>What it refuses, and why</h4>
+      <ul>
+        <li><b>A destination wallet address</b> — funding credits a ledger balance and has no
+        on-chain destination. Supplying one is an error, not an ignored field.</li>
+        <li><b>Self-custody mode, or any named chain</b> — both rejected before a cent moves.
+        The legacy path that converted and pushed coin on-chain is gone, not deprecated.</li>
+        <li><b>A solicitation whose ledger was never provisioned</b> — ownership is then
+        unprovable, so it fails closed rather than trusting the caller.</li>
+        <li><b>Another town's solicitation</b> — the earmark account carries its owner, and a
+        mismatch is refused and recorded.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>A failed allocation poisons its own idempotency key.</b> Replaying that key does not retry —
+    it re-surfaces the failure. This is deliberate: the common cause is an escrow that was short,
+    and silently retrying a money movement against a balance that has since changed is how you fund
+    something twice. Retrying takes a fresh key, which is a decision somebody has to make.
+  </div>
+
+  <div class="note money">
+    <b>One label on this path is a fiction, on purpose.</b> Funding records its chain as
+    <span class="m">polygon</span> even though nothing settles on Polygon — the saga table's
+    constraint only admits real network slugs, and the escrow path never reaches a chain at all.
+    It is a schema artifact, and the code says so where it writes it.
+  </div>
+</section>
+<section>
+  <h2>The two books, and which one is the truth</h2>
+  <p class="lede">One is <b>Modern Treasury Ledgers</b>; the other is the <b>bridge's own
+  double-entry journal</b>. The instinct is that MT holds the cash and we hold the balances. It is
+  the other way round: <b>a counterparty's spendable balance is an MT ledger account</b>, read live
+  from MT, and the journal line that looks like that balance is a mirror of it.</p>
+
+  <div class="duo">
+    <div class="panel gold">
+      <h4>Modern Treasury Ledgers — the balance of record</h4>
+      <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 12px">One platform ledger with two
+      disjoint domains. Accounts are addressed by <b>role</b> through a registry, never by a
+      hardcoded id.</p>
+      <p style="font:500 10.5px/1 var(--sans);letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px">Escrow domain — whose money it is</p>
+      <div>
+        <span class="acct l">&lt;slug&gt;:&lt;owner_ref&gt;:escrow</span>
+        <span class="acct l">sol:&lt;id&gt;:earmark</span>
+        <span class="acct l">sol:&lt;id&gt;:processor-payable</span>
+        <span class="acct l">sol:&lt;id&gt;:vendor-payable:&lt;contract&gt;</span>
+        <span class="acct a">custody_usd</span>
+        <span class="acct r">fee_revenue</span>
+      </div>
+      <p style="font:500 10.5px/1 var(--sans);letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px">Cash-mirror domain — where the cash is</p>
+      <div>
+        <span class="acct a">org_usd · org_usdg · org_usdc · org_pyusd</span>
+        <span class="acct a">clearing_usd · clearing_usdg</span>
+        <span class="acct">ext:* external mirrors</span>
+      </div>
+    </div>
+    <div class="panel gold">
+      <h4>The bridge journal — the accounting record</h4>
+      <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 12px">Thirty-five account codes.
+      <b>Only four of them have an MT counterpart at all</b> — the rest (card program, ACH, wire,
+      on-chain holdings and obligations) reconcile against nothing on the MT side, because nothing
+      over there describes them.</p>
+      <p style="font:500 10.5px/1 var(--sans);letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px">The four that tie out</p>
+      <div>
+        <span class="acct l">LIAB_MUNI_ESCROW_USD</span>
+        <span class="acct l">LIAB_OWNER_ESCROW_USD</span>
+        <span class="acct l">LIAB_LITHIC_SETTLEMENT_PAYABLE_USD</span>
+        <span class="acct r">REV_CIVIC_FEE_USD</span>
+      </div>
+      <p style="font:500 10.5px/1 var(--sans);letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px">The other thirty-one, in part</p>
+      <div>
+        <span class="acct a">ASSET_MT_CLEARING_USD</span>
+        <span class="acct l">LIAB_MT_PENDING_ONRAMP_USD</span>
+        <span class="acct l">LIAB_MT_PENDING_OFFRAMP_USD</span>
+        <span class="acct l">LIAB_VENDOR_USDC_OBLIGATION</span>
+        <span class="acct l">LIAB_PROJECT_USDG_OBLIGATION</span>
+        <span class="acct r">REV_PROGRAM_FEE_USD</span>
+        <span class="acct">EXP_INTERCHANGE_USD</span>
+        <span class="acct">EXP_ACH_FEE_USD</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note money">
+    <b>There are no per-tenant virtual accounts, and there never will be.</b> Modern Treasury is our
+    payment processor and refuses virtual accounts on payment-account internal accounts. Every owner
+    shares the organization's internal accounts; <b>separation exists only in the ledger</b>. That
+    single fact is why an inbound push has to be attributed from the account it was sent from
+    (Figure&nbsp;2), and why the escrow domain has to carry the owner identity that the cash never does.
+  </div>
+
+  <h3>What each hop actually posts</h3>
+  <div class="tbl-shell">
+    <table>
+      <thead><tr>
+        <th>Hop</th><th>Modern Treasury ledger</th><th>Bridge journal</th>
+        <th>On chain</th><th>Metered</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Town funds escrow</b><br><span style="color:var(--muted);font-size:12.5px">pull-debit or attributed push settles</span></td>
+          <td><span class="m">Dr custody_usd</span><br><span class="m">Cr &lt;slug&gt;:&lt;ref&gt;:escrow</span></td>
+          <td><span class="m">Dr ASSET_MT_CLEARING_USD</span><br><span class="m">Cr LIAB_MT_PENDING_ONRAMP_USD</span><br><span style="color:var(--muted);font-size:12px">then reclassed to <span class="m">LIAB_MUNI_ESCROW_USD</span></span></td>
+          <td>—</td><td class="no">no</td>
+        </tr>
+        <tr>
+          <td><b>Earmark a solicitation budget</b><br><span style="color:var(--muted);font-size:12.5px">step 2 of Fund &amp; Allocate</span></td>
+          <td><span class="m">Dr escrow</span><br><span class="m">Cr sol:&lt;id&gt;:earmark</span><br><span style="color:var(--muted);font-size:12px">available balance ≥ 0, enforced by MT</span></td>
+          <td><b style="color:var(--alert)">nothing at all</b><br><span style="color:var(--muted);font-size:12px">no coin moved, no USD backing changed hands</span></td>
+          <td>—</td><td class="no">no</td>
+        </tr>
+        <tr>
+          <td><b>Award, then work completion</b><br><span style="color:var(--muted);font-size:12.5px">OCDS releases</span></td>
+          <td><span class="m">Cr sol:&lt;id&gt;:vendor-payable:&lt;contract&gt;</span><br><span style="color:var(--muted);font-size:12px">a WCR moves budget to the payable</span></td>
+          <td>—</td>
+          <td><span class="m">ocds_contract</span><br><span class="m">ocds_wcr</span></td>
+          <td class="yes">yes ×2</td>
+        </tr>
+        <tr>
+          <td><b>Card spend settles</b><br><span style="color:var(--muted);font-size:12.5px">daily sync</span></td>
+          <td><span class="m">Dr earmark</span><br><span class="m">Cr processor_payable</span><br><span style="color:var(--muted);font-size:12px">fee leg → <span class="m">fee_revenue</span></span></td>
+          <td>interchange, program fee</td>
+          <td><span class="m">project_attestation</span></td>
+          <td class="no">no<br><span style="color:var(--muted);font-size:12px">interchange already earns</span></td>
+        </tr>
+        <tr>
+          <td><b>Yield accrual</b> <span style="color:var(--alert);font-size:12px">proposed</span><br><span style="color:var(--muted);font-size:12.5px">per period, on the rollup balance</span></td>
+          <td><span class="m">Dr yield_passthrough</span><br><span class="m">Cr &lt;slug&gt;:&lt;ref&gt;:escrow</span></td>
+          <td><span class="m">Dr EXP_YIELD_PASSTHROUGH_USD</span><br><span class="m">Cr LIAB_MUNI_ESCROW_USD</span><br><span style="color:var(--muted);font-size:12px">spread → <span class="m">REV_YIELD_SPREAD_USD</span></span></td>
+          <td>—</td><td class="no">no</td>
+        </tr>
+        <tr>
+          <td><b>Vendor payout</b><br><span style="color:var(--muted);font-size:12.5px">drains the payable, off-ramps to the bank</span></td>
+          <td><span class="m">Dr sol:&lt;id&gt;:vendor-payable:&lt;contract&gt;</span></td>
+          <td><span class="m">Dr LIAB_VENDOR_USDC_OBLIGATION</span><br><span class="m">Cr ASSET_USDC_HOLDINGS</span></td>
+          <td><span class="m">project_payout</span><br><span style="color:var(--muted);font-size:12px">value 0 — an attestation</span></td>
+          <td class="no">no</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <b>Three drifts are sanctioned, not bugs.</b> Card settlement debits the earmark with <em>no</em>
+    balance lock, so a solicitation's budget can go negative and the nightly check only reports it.
+    A payment order whose mirror fails to build is created <em>unledgered</em> rather than failed.
+    And the card-authorization gate never calls MT at all — it reads a local mirror in the hot path,
+    with the nightly reconciliation as the backstop. Each buys availability at the cost of a
+    temporarily wrong number.
+  </div>
+</section>
+<section>
+  <h2>Rail 1, at rest — yield on money that is waiting</h2>
+  <p class="lede">Between funding and spending, a town's money sits still — and it is
+  <em>already</em> earning. The just-in-time conversion design exists precisely so the float stays
+  in the interest-bearing account until the moment of spend. Today that return accrues to the
+  platform. <b>This adds a variable-rate pass-through, so it accrues to the municipality whose money
+  it is.</b></p>
+
+  <div class="note">
+    <b>Status: proposed.</b> Everything above this line is in the tree today. The rate schedule,
+    the accrual job and the two new accounts below are a design, not shipped code — drawn here
+    so the seams it has to fit are visible.
+  </div>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 1000 300" role="img" preserveAspectRatio="xMidYMid meet" aria-label="A town&#39;s balance at rest, taken from the rollup category that nets its escrow and every solicitation earmark, is multiplied by the rate in force from an effective-dated schedule to produce a daily accrual. The accrual then splits: the town&#39;s balance grows, and the platform retains the spread between what the float earned and what was passed through. Neither leg reaches the meter, because no on-chain write occurs.">
+        <defs>
+          <marker id="y-g" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--money-2)"></polygon></marker>
+          <marker id="y-i" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--ink-3)"></polygon></marker>
+        </defs>
+
+        <g fill="var(--card)" stroke="var(--rule-2)" stroke-width="1.5">
+          <rect x="20" y="88" width="190" height="76" rx="5"></rect>
+          <rect x="245" y="88" width="190" height="76" rx="5"></rect>
+        </g>
+        <rect x="470" y="88" width="190" height="76" rx="5" fill="var(--money-bg)" stroke="var(--money-2)" stroke-width="2"></rect>
+
+        <g class="t-node" text-anchor="middle" fill="var(--ink)">
+          <text x="115" y="114">Balance at rest</text>
+          <text x="340" y="114">Rate in force</text>
+        </g>
+        <text class="t-node" x="565" y="114" text-anchor="middle" fill="var(--money)">Daily accrual</text>
+        <g class="t-sub" text-anchor="middle" fill="var(--muted)">
+          <text x="115" y="132">escrow + every earmark</text>
+          <text x="115" y="147">the rollup category</text>
+          <text x="115" y="161">floored at zero</text>
+          <text x="340" y="132">effective-dated</text>
+          <text x="340" y="147">closed, never deleted</text>
+          <text x="340" y="161">per owner, not global</text>
+        </g>
+        <g class="t-sub" text-anchor="middle" fill="var(--money-2)">
+          <text x="565" y="132">basis × rate × days</text>
+          <text x="565" y="147">one row per period</text>
+          <text x="565" y="161">first write wins</text>
+        </g>
+
+        <rect x="700" y="30" width="280" height="76" rx="5" fill="var(--money-bg)" stroke="var(--money-br)" stroke-width="1.5"></rect>
+        <text class="t-node" x="840" y="56" text-anchor="middle" fill="var(--money)">The town’s balance grows</text>
+        <text class="t-sub" x="840" y="74" text-anchor="middle" fill="var(--money-2)">Cr its escrow · Dr yield_passthrough</text>
+        <text class="t-sub" x="840" y="90" text-anchor="middle" fill="var(--muted)">mirrored by LIAB_MUNI_ESCROW_USD</text>
+
+        <rect x="700" y="150" width="280" height="76" rx="5" fill="var(--card)" stroke="var(--rule-2)" stroke-width="1.5"></rect>
+        <text class="t-node" x="840" y="176" text-anchor="middle" fill="var(--ink)">The platform keeps the spread</text>
+        <text class="t-sub" x="840" y="194" text-anchor="middle" fill="var(--muted)">gross earned − passed through</text>
+        <text class="t-sub" x="840" y="210" text-anchor="middle" fill="var(--ink-3)">Cr REV_YIELD_SPREAD_USD</text>
+
+        <g stroke="var(--ink-3)" stroke-width="2" marker-end="url(#y-i)" fill="none">
+          <line x1="210" y1="126" x2="243" y2="126"></line>
+          <line x1="435" y1="126" x2="468" y2="126"></line>
+        </g>
+        <g stroke="var(--money-2)" stroke-width="2" marker-end="url(#y-g)" fill="none">
+          <path d="M 660 126 L 680 126 L 680 68 L 698 68"></path>
+          <path d="M 660 126 L 680 126 L 680 188 L 698 188"></path>
+        </g>
+
+        <line x1="565" y1="164" x2="565" y2="252" stroke="var(--muted-2)" stroke-width="1.5" stroke-dasharray="4 3"></line>
+        <text class="t-arrow" x="565" y="270" text-anchor="middle" fill="var(--muted-2)">no on-chain write — never reaches the meter</text>
+        <text class="t-sub" x="565" y="286" text-anchor="middle" fill="var(--muted-2)">the platform’s return here is the spread, not a billable unit</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 3 — yield accrues on the rollup, not on idle cash only.</b> The basis
+    is the category that nets a town's escrow <em>and</em> every solicitation earmark under it, which
+    is what that rollup exists for. Committing money to a procurement therefore does not stop it
+    earning — the right answer for a capital project that sits encumbered for two quarters
+    before a single invoice arrives.</figcaption>
+  </figure>
+
+  <h3>The guards this has to inherit</h3>
+  <p class="lede">Each of these is a defect this codebase has already paid for somewhere else. A new
+  money path that does not adopt them re-earns the lesson.</p>
+  <div class="duo">
+    <div class="panel gold">
+      <h4>Fail closed, do not accrue zero</h4>
+      <p style="font-size:13.5px;color:var(--ink-2);margin:0">A period with no rate row must
+      <b>refuse and raise</b>, never accrue nothing. This is exactly the silent-zero class the
+      billing meter already has a metric for: a statement showing no interest and a statement showing
+      no <em>configuration</em> are byte-identical, and only one of them is a decision.</p>
+    </div>
+    <div class="panel gold">
+      <h4>Idempotent, and therefore unforgiving</h4>
+      <p style="font-size:13.5px;color:var(--ink-2);margin:0">One accrual per owner per period, on
+      conflict do nothing — the first write wins <b>forever</b>. That is the right shape, and it
+      means a rate corrected after the fact has <b>no backfill path</b>. Which is precisely why the
+      guard above is a refusal rather than a warning.</p>
+    </div>
+    <div class="panel gold">
+      <h4>Deterministic key, not MT’s window</h4>
+      <p style="font-size:13.5px;color:var(--ink-2);margin:0">Modern Treasury’s own idempotency
+      key expires after 24 hours. An accrual re-run a month later would post twice. The posting has to
+      carry a deterministic key in our own forever-dedupe table, the way every other MT ledger
+      movement here already does.</p>
+    </div>
+    <div class="panel gold">
+      <h4>Floor the basis, and take no balance lock</h4>
+      <p style="font-size:13.5px;color:var(--ink-2);margin:0">Card settlement can drive an earmark
+      negative by design. A negative basis would quietly <b>charge</b> a town interest, so the basis
+      floors at zero. And the accrual is a credit — the available-balance constraint that guards
+      allocation does not apply here and must not be copied across.</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>The constraint that decides whether this is sellable is not technical.</b> Interest on public
+    deposits is regulated, and the rules differ by jurisdiction — who may earn it, and where it
+    must be remitted. Separately, if a town’s escrow ever holds bond proceeds, federal
+    arbitrage-rebate rules can require excess earnings be handed back. That is why the rate schedule
+    is keyed <b>per owner</b> rather than set globally: some towns will need a zero rate, and a zero
+    that was chosen has to be distinguishable from a zero that was never configured. Confirm the
+    treatment with counsel per state before enabling it for a tenant.
+  </div>
+</section>
+<section>
+  <h2>Rail 1, spending — the card</h2>
+  <p class="lede">A solicitation budget drains two ways. One is the vendor payout in the next
+  section. The other is a <b>purchase card</b> — and the card is the only instrument on this
+  page with <b>two parties on it</b>: the municipality issues, funds, limits, freezes and closes it;
+  the vendor carries it and spends. Every card hangs off a contract, and the budget it draws down
+  belongs to the town.</p>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 1000 250" role="img" preserveAspectRatio="xMidYMid meet" aria-label="An authorization passes six gates in a fixed order: amount sanity, card open, project active, merchant category on the project list, solicitation escrow coverage, and spend reservation. Each has its own decline reason. The merchant-category gate sits before the balance gate, so a rejected category never consumes the project&#39;s spend.">
+        <defs>
+          <marker id="c-i" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--ink-3)"></polygon></marker>
+          <marker id="c-d" markerWidth="7" markerHeight="6" refX="6.6" refY="3" orient="auto">
+            <polygon points="0 0, 7 3, 0 6" fill="var(--alert)"></polygon></marker>
+          <marker id="c-g" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--money-2)"></polygon></marker>
+        </defs>
+
+        <text class="t-lane" x="18" y="34" fill="var(--ink-3)">Authorization, in the order the gates actually run</text>
+
+        <g fill="var(--card)" stroke="var(--rule-2)" stroke-width="1.5">
+          <rect x="18" y="56" width="124" height="56" rx="5"></rect>
+          <rect x="158" y="56" width="124" height="56" rx="5"></rect>
+          <rect x="298" y="56" width="124" height="56" rx="5"></rect>
+          <rect x="578" y="56" width="124" height="56" rx="5"></rect>
+          <rect x="718" y="56" width="124" height="56" rx="5"></rect>
+        </g>
+        <rect x="438" y="56" width="124" height="56" rx="5" fill="var(--money-bg)" stroke="var(--money-2)" stroke-width="2.5"></rect>
+        <rect x="858" y="56" width="124" height="56" rx="5" fill="var(--money-bg)" stroke="var(--money-2)" stroke-width="2"></rect>
+
+        <g class="t-node" text-anchor="middle" fill="var(--ink)">
+          <text x="80" y="80">Amount sane?</text>
+          <text x="220" y="80">Card open?</text>
+          <text x="360" y="80">Project active?</text>
+          <text x="640" y="80">Escrow covers?</text>
+          <text x="780" y="80">Reserve spend</text>
+        </g>
+        <text class="t-node" x="500" y="80" text-anchor="middle" fill="var(--money)">MCC allowed?</text>
+        <text class="t-node" x="920" y="80" text-anchor="middle" fill="var(--money)">APPROVED</text>
+        <g class="t-sub" text-anchor="middle" fill="var(--muted)">
+          <text x="80" y="98">non-negative</text>
+          <text x="220" y="98">by card_token</text>
+          <text x="360" y="98">covers $0 probes</text>
+          <text x="640" y="98">opt-in · local only</text>
+          <text x="780" y="98">under a row lock</text>
+        </g>
+        <text class="t-sub" x="500" y="98" text-anchor="middle" fill="var(--money-2)">the project’s list</text>
+        <text class="t-sub" x="920" y="98" text-anchor="middle" fill="var(--money-2)">spend is held</text>
+
+        <g stroke="var(--ink-3)" stroke-width="2" marker-end="url(#c-i)" fill="none">
+          <line x1="142" y1="84" x2="156" y2="84"></line>
+          <line x1="282" y1="84" x2="296" y2="84"></line>
+          <line x1="422" y1="84" x2="436" y2="84"></line>
+          <line x1="562" y1="84" x2="576" y2="84"></line>
+          <line x1="702" y1="84" x2="716" y2="84"></line>
+        </g>
+        <line x1="842" y1="84" x2="856" y2="84" stroke="var(--money-2)" stroke-width="2.5" marker-end="url(#c-g)"></line>
+
+        <g stroke="var(--alert)" stroke-width="1.5" marker-end="url(#c-d)" fill="none">
+          <line x1="80" y1="112" x2="80" y2="150"></line>
+          <line x1="220" y1="112" x2="220" y2="150"></line>
+          <line x1="360" y1="112" x2="360" y2="150"></line>
+          <line x1="640" y1="112" x2="640" y2="150"></line>
+          <line x1="780" y1="112" x2="780" y2="150"></line>
+        </g>
+        <line x1="500" y1="112" x2="500" y2="150" stroke="var(--alert)" stroke-width="2.5" marker-end="url(#c-d)"></line>
+
+        <g fill="var(--alert-bg)" stroke="var(--alert)" stroke-width="1">
+          <rect x="18" y="152" width="124" height="42" rx="4"></rect>
+          <rect x="158" y="152" width="124" height="42" rx="4"></rect>
+          <rect x="298" y="152" width="124" height="42" rx="4"></rect>
+          <rect x="438" y="152" width="124" height="42" rx="4"></rect>
+          <rect x="578" y="152" width="124" height="42" rx="4"></rect>
+          <rect x="718" y="152" width="124" height="42" rx="4"></rect>
+        </g>
+        <g class="t-arrow" text-anchor="middle" fill="var(--alert)">
+          <text x="80" y="177">invalid_amount</text>
+          <text x="220" y="169">unknown_or_</text><text x="220" y="184">closed_card</text>
+          <text x="360" y="169">project_</text><text x="360" y="184">not_active</text>
+          <text x="500" y="177">mcc_not_allowed</text>
+          <text x="640" y="169">insufficient_</text><text x="640" y="184">solicitation_escrow</text>
+          <text x="780" y="169">insufficient_</text><text x="780" y="184">project_balance</text>
+        </g>
+
+        <text class="t-sub" x="18" y="220" fill="var(--muted-2)">Before all six: a replayed authorization returns its original decision, so a retried message cannot reserve spend twice.</text>
+        <text class="t-sub" x="18" y="236" fill="var(--muted-2)">A card bound to no project bypasses every gate above — the legacy shape, and the one place none of this applies.</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 4 — the category gate sits before the money gate, on purpose.</b>
+    The handler comment says so outright: order matters, because a category rejection must not consume
+    the project’s spend. Reversed, every declined coffee would briefly hold budget a legitimate
+    purchase then could not draw on. Two tells that this ordering is deliberate rather than
+    incidental: the category decline is the <em>only</em> arm that does not increment the general
+    denial counter — it has its own — and the project-status check is <b>doubled</b>,
+    because the authoritative one lives inside the reservation and a reservation only runs for a
+    positive amount, so a <b>zero-dollar verification probe</b> once sailed through every project gate
+    and came back approved on a closed-out project. Past approval, the persist is one transaction; if
+    it fails, the reserved spend is compensated back rather than stranded.</figcaption>
+  </figure>
+
+  <h3>Three domains, and only one of them can act</h3>
+  <div class="duo">
+    <div class="panel gold">
+      <h4>Municipality — the issuer</h4>
+      <ul>
+        <li><b>Issues the card</b> against a contract. The caller never names the cardholder’s
+        business; it is derived from the contract, so a card cannot be issued to the wrong company by
+        asking.</li>
+        <li><b>Sets the category list</b> on the solicitation. This is the only municipal route that
+        changes merchant-category rules — the platform’s own category profiles are
+        read-only to a town.</li>
+        <li><b>Bounds the spend twice.</b> A per-card limit and window, under an outer ceiling: the
+        sum of every open card’s limit on a contract may not exceed the card pool the town
+        allocated at award.</li>
+        <li><b>Keeps the roster.</b> The per-employee card list is a <em>municipal</em> roster of
+        <em>vendor</em> employees, copied from the vendor’s own proposal team at award. The town
+        adds the person and mints the card.</li>
+        <li><b>Freeze, close, refill.</b> All lifecycle verbs are municipal, and the finance-only
+        capabilities are separated from the ones every municipal seat gets — viewing cards and
+        categories is base; managing them is not.</li>
+      </ul>
+    </div>
+    <div class="panel gold">
+      <h4>Vendor — the cardholder</h4>
+      <ul>
+        <li><b>Read-only on the card itself.</b> The vendor’s screen renders its contracts, its
+        cards and the category locks, and offers no lifecycle verb at all.</li>
+        <li><b>One write, and it is a request.</b> The vendor can ask for a refill. The municipality
+        decides, and approving is what moves money onto the card. That asymmetry is the whole
+        relationship in one route.</li>
+        <li><b>Supplies identity evidence.</b> Enrollment examines named officers and beneficial
+        owners. Of its eight outcomes, <b>three mean the vendor must act</b> — and the mainline
+        first outcome is one of them.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4>Platform — the cross-tenant view</h4>
+      <ul>
+        <li>A cross-tenant card console and an enrollment queue that spans towns.</li>
+        <li>The queue is <b>admin-only and deliberately not readable by support</b>, and it is the one
+        place a rejected enrollment surfaces.</li>
+        <li>The bulk mint at award time is a platform-level call, capped at a hundred cards, with the
+        awarded vendor as account holder.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Identity enrollment is not a gate, and assuming it is would be the natural mistake.</b> A
+    vendor with no enrollment <em>still gets a card</em> — account-holder resolution falls
+    through to a legacy exempt holder. Enrollment upgrades the card’s business identity; it does
+    not authorize issuance. The fall-through is deliberate: making it a hard requirement would stop
+    card issuance on every deployment that has not enrolled anybody yet.
+  </div>
+
+  <div class="note">
+    <b>Two asymmetries inside enrollment that read backwards until you see why.</b> A municipal seat
+    may hold the submit capability and still <em>never</em> submit — one key covers both submit
+    and refresh, and the handler refuses the submit arm for every municipal seat regardless of what
+    they hold. And a municipal seat may initiate a document upload and receive the status and reason
+    codes, but <b>the upload credential itself is stripped</b>: the write channel into a
+    vendor’s identity file only ever reaches the vendor.
+  </div>
+
+  <div class="note money">
+    <b>The category code leads a double life, and that is the interesting part.</b> Before the
+    purchase it is a <em>control</em> — the gate that can refuse. After settlement it becomes a
+    <em>disclosure</em>: the code rides into the on-chain attestation line item, where it is what
+    makes an amount mean anything. “$88.00” and “$88.00 at a restaurant” are
+    different facts on a public ledger. The merchant handle travels with it, and stays stable across
+    transactions where a printed descriptor does not — descriptors vary by terminal.
+  </div>
+
+  <h3>Where the money goes</h3>
+  <div class="tbl-shell">
+    <table>
+      <thead><tr><th>Event</th><th>Journal</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td><b>Authorization held</b></td>
+            <td><span class="m">Dr LIAB_CUSTOMER_AVAILABLE_USD</span><br><span class="m">Cr LIAB_CUSTOMER_HELD_USD</span></td>
+            <td>Spendable becomes held. Nothing has settled.</td></tr>
+        <tr><td><b>Captured</b><br><span style="color:var(--muted);font-size:12.5px">full or partial</span></td>
+            <td><span class="m">Dr LIAB_CUSTOMER_HELD_USD</span><br><span class="m">Cr LIAB_CUSTOMER_SETTLED_USD</span></td>
+            <td>One balanced pair. See the divergence note below — partial does <em>not</em> do what the docs say.</td></tr>
+        <tr><td><b>Capture fees</b><br><span style="color:var(--muted);font-size:12.5px">three legs</span></td>
+            <td><span class="m">Dr EXP_INTERCHANGE_USD</span><br><span class="m">Dr EXP_NETWORK_FEE_USD</span><br>both → <span class="m">ASSET_PROGRAM_CLEARING_USD</span><br>then <span class="m">Cr REV_PROGRAM_FEE_USD</span></td>
+            <td>Interchange and the network fixed fee are costs; the program fee is the revenue. All three clear through one account.</td></tr>
+        <tr><td><b>Hold released</b><br><span style="color:var(--muted);font-size:12.5px">reversal, void, expiry, manual</span></td>
+            <td>held → available</td>
+            <td>Four different events, one posting arm. The budget is freed.</td></tr>
+        <tr><td><b>Refunded</b></td>
+            <td><span class="m">Dr LIAB_CUSTOMER_SETTLED_USD</span><br><span class="m">Cr LIAB_CUSTOMER_AVAILABLE_USD</span></td>
+            <td>Straight back to spendable.</td></tr>
+        <tr><td><b>Disputed</b></td>
+            <td><span class="m">ASSET_DISPUTE_RESERVE_USD</span> → customer provisional</td>
+            <td>Four separate arms — provisional credit, chargeback received, won, lost.</td></tr>
+        <tr><td><b>Settled, daily</b></td>
+            <td>MT: <span class="m">Dr earmark / Cr processor_payable</span><br>fee leg: <span class="m">Dr earmark / Cr fee_revenue</span></td>
+            <td>Where the solicitation budget is actually reduced, and where the escrow-domain fee is taken.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <b>Two things in that table are not what the documentation says.</b> A <em>partial</em> capture
+    takes the same arm as a full one and posts a single held-to-settled pair — it does
+    <b>not</b> release the uncaptured remainder back to available, which the accounting doc claims it
+    does. And an <em>incremental</em> authorization is documented as a posting set but has no arm at
+    all: it produces zero journal lines and never touches the hold record, so the held amount stays at
+    the original figure. Its regression test asserts the transaction row and never a journal line,
+    which is why it has stayed invisible.
+  </div>
+
+  <div class="note money">
+    <b>Card spend is the one activity on this page with its own revenue model</b> — interchange,
+    a program fee and a per-capture network charge already monetize it, which is exactly why the
+    settlement attestation it produces is <b>excluded from the meter</b>. Metering the anchor as well
+    would charge twice for one purchase. It is the clearest case on the page of an exclusion that is a
+    pricing decision rather than an oversight.
+  </div>
+
+  <div class="note rec">
+    <b>A card could mint successfully and still be dead — now closed.</b> A card whose bridge
+    registration failed is declined at the terminal as unknown, and it never reaches the first gate
+    above. The mint is deliberately allowed to survive that failure, and it still is. What was wrong
+    is that the <em>outcome</em> lived only in the mint response and a log line, so nothing on the
+    card row recorded it and every screen drew a healthy card — the first symptom was a refused
+    purchase, and the card appeared in no repair worklist.
+    <br><br>
+    The outcome is now <b>persisted on the card</b> and carried on every read path, in <b>three</b>
+    states rather than two. The third one is the interesting one: every card issued before the column
+    existed is <span class="m">unknown</span>, because the fact was never recorded. A boolean would
+    have forced a lie — <span class="m">false</span> puts a warning on every healthy card in the
+    estate, which is how a real warning becomes invisible, and <span class="m">true</span> absolves
+    exactly the dead cards the column exists to find. The vendor now sees a plain-language notice in
+    the one place they would look, the operator gets an indexed worklist, and both resolve through the
+    repair button that already existed.
+  </div>
+
+  <div class="note">
+    <b>One number here still has no tie-out.</b> The per-project pool the reservation gate declines
+    against is a fourth balance store with no sub-ledger integrity check behind it — and it is
+    the number a cardholder feels at the till.
+  </div>
+</section>
+
+<section>
+  <h2>Rail 1, last step — paying the vendor</h2>
+  <p class="lede">An approved work-completion record splits into two things that travel separately
+  and must not be confused: <b>the value</b>, which never leaves the banking rails, and <b>the
+  record</b>, which goes on chain carrying no value at all.</p>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 1000 300" role="img" preserveAspectRatio="xMidYMid meet" aria-label="An approved work-completion record forks into two paths. The value path drains the per-contract vendor payable, creates a Modern Treasury payment order, sends over ACH or wire, and lands in the vendor&#39;s own bank account. The record path emits a civic payout version one message as a zero-value self-transfer onto Polygon, producing a public record. The two never merge; the blockchain never carries the money, and the record path is deliberately not billed.">
+        <defs>
+          <marker id="p-g" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--money-2)"></polygon></marker>
+          <marker id="p-s" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--rec-2)"></polygon></marker>
+        </defs>
+
+        <rect x="20" y="122" width="190" height="64" rx="5" fill="var(--card)" stroke="var(--ink-3)" stroke-width="1.5"></rect>
+        <text class="t-node" x="115" y="146" text-anchor="middle" fill="var(--ink)">Work completion</text>
+        <text class="t-node" x="115" y="162" text-anchor="middle" fill="var(--ink)">approved</text>
+        <text class="t-sub" x="115" y="178" text-anchor="middle" fill="var(--muted)">one event, two consequences</text>
+
+        <!-- value lane -->
+        <g fill="var(--money-bg)" stroke="var(--money-br)" stroke-width="1.5">
+          <rect x="250" y="48" width="170" height="64" rx="5"></rect>
+          <rect x="450" y="48" width="160" height="64" rx="5"></rect>
+          <rect x="650" y="48" width="140" height="64" rx="5"></rect>
+        </g>
+        <rect x="830" y="48" width="150" height="64" rx="5" fill="var(--money-bg)" stroke="var(--money-2)" stroke-width="2"></rect>
+        <g class="t-node" text-anchor="middle" fill="var(--money)">
+          <text x="335" y="72">Vendor payable</text>
+          <text x="530" y="72">MT payment order</text>
+          <text x="720" y="72">ACH or wire</text>
+          <text x="905" y="72">Vendor's bank</text>
+        </g>
+        <g class="t-sub" text-anchor="middle" fill="var(--money-2)">
+          <text x="335" y="90">drained, per contract</text>
+          <text x="530" y="90">to a registered account</text>
+          <text x="720" y="90">origination fee: 0</text>
+          <text x="905" y="90">their own institution</text>
+        </g>
+        <text class="t-sub" x="335" y="105" text-anchor="middle" fill="var(--muted)">sol:&lt;id&gt;:vendor-payable</text>
+        <text class="t-sub" x="530" y="105" text-anchor="middle" fill="var(--muted)">must belong to this vendor</text>
+
+        <!-- record lane -->
+        <g fill="var(--rec-bg)" stroke="var(--rec-br)" stroke-width="1.5">
+          <rect x="250" y="196" width="170" height="64" rx="5"></rect>
+          <rect x="450" y="196" width="160" height="64" rx="5"></rect>
+          <rect x="650" y="196" width="140" height="64" rx="5"></rect>
+          <rect x="830" y="196" width="150" height="64" rx="5"></rect>
+        </g>
+        <g class="t-node" text-anchor="middle" fill="var(--rec)">
+          <text x="335" y="220">civic.payout/v1</text>
+          <text x="530" y="220">Self-transfer</text>
+          <text x="720" y="220">Polygon</text>
+          <text x="905" y="220">Public record</text>
+        </g>
+        <g class="t-sub" text-anchor="middle" fill="var(--rec-2)">
+          <text x="335" y="238">the memo carries cents</text>
+          <text x="530" y="238">amount = 0</text>
+          <text x="720" y="238">the default chain</text>
+          <text x="905" y="238">anyone can verify</text>
+        </g>
+        <text class="t-sub" x="530" y="253" text-anchor="middle" fill="var(--muted)">nothing to move, nothing to steal</text>
+        <text class="t-sub" x="905" y="253" text-anchor="middle" fill="var(--muted-2)">not billed, by decision</text>
+
+        <g stroke="var(--money-2)" stroke-width="2" marker-end="url(#p-g)" fill="none">
+          <path d="M 210 142 L 230 142 L 230 80 L 248 80"></path>
+          <line x1="420" y1="80" x2="448" y2="80"></line>
+          <line x1="610" y1="80" x2="648" y2="80"></line>
+          <line x1="790" y1="80" x2="828" y2="80"></line>
+        </g>
+        <g stroke="var(--rec-2)" stroke-width="2" marker-end="url(#p-s)" fill="none">
+          <path d="M 210 166 L 230 166 L 230 228 L 248 228"></path>
+          <line x1="420" y1="228" x2="448" y2="228"></line>
+          <line x1="610" y1="228" x2="648" y2="228"></line>
+          <line x1="790" y1="228" x2="828" y2="228"></line>
+        </g>
+
+        <text class="t-lane" x="250" y="34" fill="var(--money)">the value — on the banking rails</text>
+        <text class="t-lane" x="250" y="284" fill="var(--rec)">the record — on the chain</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 5 — the money and its receipt take different roads.</b> The chain
+    leg is an <em>attestation</em>: a self-transfer whose amount is zero and whose memo carries the
+    real figure. On-chain token transfers are gated by a flag that defaults to <b>off</b>, and that
+    check sits first in the payout path on purpose — everything below it exists only to move tokens,
+    so with the policy holding, the payout leg cannot be anything but a record. The destination bank
+    account is re-checked against the vendor before the off-ramp runs; a cross-tenant payout is
+    refused, not reconciled later.</figcaption>
+  </figure>
+</section>
+<section>
+  <h2>Rail 2 — TLaaS, where nothing moves but the record</h2>
+  <p class="lede">A customer connects a bank account and points feeds at it. Five ingestion sources
+  — a webhook, an uploaded file, a bank API pull, an outbound SFTP pull, and a hosted SFTP drop
+  banks log into — all normalize into one transaction shape. The same transaction reported twice is
+  anchored <b>once</b>. What reaches the chain is a hash and four safe fields; everything that
+  identifies a person stays sealed in Postgres.</p>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 1000 300" role="img" preserveAspectRatio="xMidYMid meet" aria-label="Three links of a per-account hash chain, each carrying the previous link&#39;s hash forward. The middle link&#39;s current hash fans out to three blockchains: Polygon as the primary, plus Stellar and Solana. The chain itself is never forked; only the broadcast fans out, so a reader on any chain verifies the identical commitment.">
+        <defs>
+          <marker id="h-s" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--rec-2)"></polygon></marker>
+        </defs>
+
+        <text class="t-lane" x="20" y="32" fill="var(--rec)">One account · one tamper-evident chain</text>
+
+        <g fill="var(--rec-bg)" stroke="var(--rec-br)" stroke-width="1.5">
+          <rect x="140" y="56" width="200" height="66" rx="5"></rect>
+          <rect x="400" y="56" width="200" height="66" rx="5"></rect>
+          <rect x="660" y="56" width="200" height="66" rx="5"></rect>
+        </g>
+        <g class="t-node" text-anchor="middle" fill="var(--rec)">
+          <text x="240" y="80">link n−1</text>
+          <text x="500" y="80">link n</text>
+          <text x="760" y="80">link n+1</text>
+        </g>
+        <g class="t-sub" text-anchor="middle" fill="var(--rec-2)">
+          <text x="240" y="98">chain_index 41</text>
+          <text x="500" y="98">chain_index 42</text>
+          <text x="760" y="98">chain_index 43</text>
+          <text x="240" y="113">current_hash a3f…</text>
+          <text x="500" y="113">current_hash 7c1…</text>
+          <text x="760" y="113">current_hash 9e4…</text>
+        </g>
+        <g stroke="var(--rec-2)" stroke-width="2" marker-end="url(#h-s)" fill="none">
+          <line x1="340" y1="89" x2="398" y2="89"></line>
+          <line x1="600" y1="89" x2="658" y2="89"></line>
+        </g>
+        <g class="t-arrow" text-anchor="middle" fill="var(--muted)">
+          <text x="369" y="46">previous_hash</text>
+          <text x="629" y="46">previous_hash</text>
+        </g>
+
+        <g stroke="var(--rec-2)" stroke-width="2" marker-end="url(#h-s)" fill="none">
+          <path d="M 500 122 L 500 150 L 250 150 L 250 202"></path>
+          <path d="M 500 122 L 500 202"></path>
+          <path d="M 500 122 L 500 150 L 750 150 L 750 202"></path>
+        </g>
+        <rect x="556" y="140" width="196" height="15" fill="var(--card)"></rect>
+        <text class="t-arrow" x="654" y="151" fill="var(--rec-2)">the same current_hash, once each</text>
+
+        <g fill="var(--card)" stroke="var(--rec-br)" stroke-width="1.5">
+          <rect x="175" y="204" width="150" height="52" rx="5"></rect>
+          <rect x="425" y="204" width="150" height="52" rx="5"></rect>
+          <rect x="675" y="204" width="150" height="52" rx="5"></rect>
+        </g>
+        <g class="t-node" text-anchor="middle" fill="var(--ink)">
+          <text x="250" y="226">Polygon</text>
+          <text x="500" y="226">Stellar</text>
+          <text x="750" y="226">Solana</text>
+        </g>
+        <g class="t-sub" text-anchor="middle" fill="var(--muted)">
+          <text x="250" y="243">primary · ap_anchors</text>
+          <text x="500" y="243">ap_anchor_posts</text>
+          <text x="750" y="243">ap_anchor_posts</text>
+        </g>
+        <text class="t-sub" x="500" y="282" text-anchor="middle" fill="var(--muted-2)">Each extra chain carries its own claim, retry and in-flight probe · one being down never costs the others their record</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 6 — one chain, many blockchains.</b> The hash chain is never forked, and
+    that is the point: one account is one tamper-evident stream, and splitting it per blockchain
+    would leave three chains each proving less than the one they replaced. What fans out is the
+    <em>broadcast</em>. An account subscribed only to its primary writes no extra rows and behaves
+    exactly as it did before the fan-out existed — and each published chain bills as its own
+    write, so a three-chain account is billed three times for one transaction.</figcaption>
+  </figure>
+
+  <div class="duo">
+    <div class="panel sage">
+      <h4>What reaches the chain</h4>
+      <ul>
+        <li>The SHA-256 commitment</li>
+        <li><span class="m">warrant_id</span> · <span class="m">account_code</span></li>
+        <li><span class="m">amount_cents</span> · <span class="m">previous_hash</span></li>
+      </ul>
+      <p style="font-size:12.5px;color:var(--muted);margin:12px 0 0">Frozen by a golden test — it is
+      the contract an outside verifier reproduces.</p>
+    </div>
+    <div class="panel">
+      <h4>What never leaves Postgres</h4>
+      <ul>
+        <li>Payee legal names</li>
+        <li>Bank account numbers</li>
+        <li>Invoice text and free-text memos</li>
+      </ul>
+      <p style="font-size:12.5px;color:var(--muted);margin:12px 0 0">Sealed in the ingest payload.
+      The split happens at parse time, before anything is hashed.</p>
+    </div>
+  </div>
+
+  <h3>Who signs — three different wallets, on purpose</h3>
+  <div class="tbl-shell">
+    <table>
+      <thead><tr><th>Signer</th><th>Used by</th><th>What the reader can conclude</th></tr></thead>
+      <tbody>
+        <tr><td><b>The owner's own wallet</b><br><span class="m">bridge-custodied master</span></td>
+            <td>Civic messages, municipal-form broadcasts</td>
+            <td>The strongest claim: <em>the town itself said this.</em> The signature is the identity.</td></tr>
+        <tr><td><b>A carrier wallet</b><br><span class="m">enterprise_wallets</span></td>
+            <td>Enterprise envelopes, AP and Plaid anchors</td>
+            <td>One active wallet per enterprise per chain, byte-capped and rotatable — a distinct identity from any project wallet.</td></tr>
+        <tr><td><b>The platform relay wallet</b><br><span class="m">civic.mt-relay/v1</span></td>
+            <td>Owners whose money lives at Modern Treasury</td>
+            <td>Weaker, and the schema says so: <em>CivicChain asserts X about owner Y.</em> The owner identity rides in the payload, not the signature.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note rec">
+    <b>Why the relay wallet has to exist.</b> Modern Treasury is our payment processor, and it has
+    no on-chain memo primitive: a stablecoin payment order names a receiving account, never a raw
+    address, and MT will only send <em>from</em> an internal account. So an owner's MT-registered
+    address can receive money and can never sign an attestation. A platform wallet signs instead —
+    and is deliberately <b>not</b> registered with MT, so relay identity and money identity stay
+    separate.
+  </div>
+</section>
+<section>
+  <h2>Where metering occurs</h2>
+  <p class="lede">There is <b>one billable unit in the whole platform</b>: a validated on-chain
+  write of a billable record type. Not a dollar moved, not a file ingested, not a form filed — a
+  confirmed anchor. Everything else on this page is unpriced.</p>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 1020 200" role="img" preserveAspectRatio="xMidYMid meet" aria-label="An anchor row moves through five states: pending, in flight, submitted, validated, then the meter, then the invoice. The retry budget is charged at the claim, on the transition from pending to in flight. Billing is recorded much later, at confirmation, on the transition from validated into the meter. These are deliberately different points.">
+        <defs>
+          <marker id="m-i" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--ink-3)"></polygon></marker>
+          <marker id="m-g" markerWidth="8" markerHeight="6" refX="7.4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--money-2)"></polygon></marker>
+        </defs>
+
+        <g fill="var(--card)" stroke="var(--rule-2)" stroke-width="1.5">
+          <rect x="20" y="52" width="126" height="52" rx="5"></rect>
+          <rect x="186" y="52" width="126" height="52" rx="5"></rect>
+          <rect x="352" y="52" width="126" height="52" rx="5"></rect>
+          <rect x="518" y="52" width="126" height="52" rx="5"></rect>
+        </g>
+        <rect x="684" y="52" width="146" height="52" rx="5" fill="var(--money-bg)" stroke="var(--money-2)" stroke-width="2"></rect>
+        <rect x="870" y="52" width="130" height="52" rx="5" fill="var(--card)" stroke="var(--money-br)" stroke-width="1.5"></rect>
+
+        <g class="t-node" text-anchor="middle" fill="var(--ink)">
+          <text x="83" y="76">pending</text>
+          <text x="249" y="76">in_flight</text>
+          <text x="415" y="76">submitted</text>
+          <text x="581" y="76">validated</text>
+        </g>
+        <text class="t-node" x="757" y="76" text-anchor="middle" fill="var(--money)">THE METER</text>
+        <text class="t-node" x="935" y="76" text-anchor="middle" fill="var(--money)">Invoice</text>
+        <g class="t-sub" text-anchor="middle" fill="var(--muted)">
+          <text x="83" y="93">queued in Postgres</text>
+          <text x="249" y="93">claimed by a worker</text>
+          <text x="415" y="93">broadcast, hash held</text>
+          <text x="581" y="93">on chain, confirmed</text>
+          <text x="935" y="93">base_fee + writes</text>
+        </g>
+        <text class="t-sub" x="757" y="93" text-anchor="middle" fill="var(--money-2)">+1 billable write</text>
+
+        <g stroke="var(--ink-3)" stroke-width="2" marker-end="url(#m-i)" fill="none">
+          <line x1="146" y1="78" x2="184" y2="78"></line>
+          <line x1="312" y1="78" x2="350" y2="78"></line>
+          <line x1="478" y1="78" x2="516" y2="78"></line>
+        </g>
+        <g stroke="var(--money-2)" stroke-width="2.5" marker-end="url(#m-g)" fill="none">
+          <line x1="644" y1="78" x2="682" y2="78"></line>
+          <line x1="830" y1="78" x2="868" y2="78"></line>
+        </g>
+
+        <g class="t-arrow" text-anchor="middle" fill="var(--muted)">
+          <text x="166" y="128">CAS pending→in_flight</text>
+          <text x="332" y="128">sign + broadcast</text>
+          <text x="498" y="128">chain confirms</text>
+          <text x="850" y="128">once per period</text>
+        </g>
+        <text class="t-arrow" x="664" y="128" text-anchor="middle" fill="var(--money-2)">meter fires, once</text>
+
+        <line x1="166" y1="138" x2="166" y2="152" stroke="var(--alert)" stroke-width="2"></line>
+        <text class="t-arrow" x="166" y="168" text-anchor="middle" fill="var(--alert)">retry budget charged HERE</text>
+        <text class="t-sub" x="166" y="184" text-anchor="middle" fill="var(--muted-2)">attempts + 1, before the work</text>
+
+        <line x1="664" y1="138" x2="664" y2="152" stroke="var(--money-2)" stroke-width="2"></line>
+        <text class="t-arrow" x="664" y="168" text-anchor="middle" fill="var(--money)">billing recorded HERE</text>
+        <text class="t-sub" x="664" y="184" text-anchor="middle" fill="var(--muted-2)">idempotent on (user, table, row)</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 7 — the meter fires at the far end, and only there.</b> The two marked
+    points are the most confusable thing in this subsystem, and they are deliberately different:
+    the <b>retry budget</b> is spent when a worker <em>claims</em> the row, so a crash-looping row
+    still reaches a terminal state; the <b>bill</b> is recorded only once the chain has
+    confirmed. A row that is claimed five times and never confirms costs its whole budget and
+    bills nothing.</figcaption>
+  </figure>
+
+  <h3>The seven billable writes</h3>
+  <div class="tbl-shell">
+    <table>
+      <thead><tr>
+        <th></th><th>anchor_type</th><th>What produces it</th><th>Rail</th>
+        <th>Metered where</th><th>Billed to</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><span class="mkr rec">1</span></td><td><span class="m">ap_anchor</span></td>
+            <td>An AP transaction, from any of the five ingestion sources</td>
+            <td>TLaaS</td><td>Bridge, in-process</td><td>Enterprise</td></tr>
+        <tr><td><span class="mkr rec">2</span></td><td><span class="m">plaid_anchor</span></td>
+            <td>A settled bank disbursement seen through Plaid</td>
+            <td>TLaaS</td><td>Bridge, in-process</td><td>Enterprise</td></tr>
+        <tr><td><span class="mkr rec">3</span></td><td><span class="m">enterprise_memo</span></td>
+            <td>An enterprise envelope posted from its carrier wallet</td>
+            <td>TLaaS</td><td>Bridge, in-process</td><td>Enterprise</td></tr>
+        <tr><td><span class="mkr rec">4</span></td><td><span class="m">civic_message</span></td>
+            <td>A public notice stamped from the owner's own wallet</td>
+            <td>TLaaS</td><td>Bridge, in-process</td><td>Owner</td></tr>
+        <tr><td><span class="mkr rec">5</span></td><td><span class="m">civic_form</span></td>
+            <td>A municipal-form submit broadcast</td>
+            <td>TLaaS</td><td>Bridge, in-process</td><td>Municipality</td></tr>
+        <tr><td><span class="mkr">6</span></td><td><span class="m">ocds_contract</span></td>
+            <td>Solicitation finalization and contract award</td>
+            <td>Procurement</td><td>Backend → bridge</td><td>Municipality</td></tr>
+        <tr><td><span class="mkr">7</span></td><td><span class="m">ocds_wcr</span></td>
+            <td>A work-completion record</td>
+            <td>Procurement</td><td>Backend → bridge</td><td>Municipality</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-top:10px">Five of the seven belong to TLaaS;
+  only two come off the procurement rail, and both are records of a decision rather than of a
+  payment. <span class="m">civic_form</span> is priced at an <b>explicit zero</b> — a deliberate
+  decision written down, because a <em>missing</em> rate cell also bills nothing and the two would
+  otherwise be indistinguishable.</p>
+
+  <div class="duo">
+    <div class="panel gold">
+      <h4>What the money rail is never billed for</h4>
+      <ul>
+        <li><b>Funding the escrow</b> — the whole on-ramp emits no chain write, so no meter is reachable.</li>
+        <li><b>Earmarking a solicitation budget</b> — one Modern Treasury ledger movement, nothing on chain.</li>
+        <li><b>Yield accrued to a town</b> — a ledger posting, so no billable unit exists for it. The platform earns the spread instead.</li>
+        <li><span class="m">project_payout</span> — the payout attestation is excluded by decision, not omission.</li>
+        <li><span class="m">project_attestation</span> — card spend is already monetized by interchange; metering the batch anchor would charge twice for one activity.</li>
+        <li><span class="m">settlement</span> — excluded, and separately produced by nothing.</li>
+      </ul>
+    </div>
+    <div class="panel gold">
+      <h4>The fee rails that do run on money</h4>
+      <ul>
+        <li><b>Card interchange</b> — 180 bps, plus a 50 bps program fee and 10¢ per capture. This is where card spend earns.</li>
+        <li><b><span class="m">MT_CIVIC_FEE_BPS</span></b> — the only escrow-domain fee, charged at <em>spend</em> time in the daily card sync, never at fund or allocate. Defaults to 0.</li>
+        <li><b>ACH / wire origination</b> — every knob defaults to 0, so a crypto payout attestation earns nothing at all.</li>
+        <li><b>Tier subscription</b> — <span class="m">base_fee</span>, plus an included-write allowance applied most-expensive-first.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Two switches make the whole meter silent.</b> <span class="m">BILLING_ENABLED</span>
+    defaults to <b>false</b> in code, and <span class="m">users.pricing_tier_key</span> has no
+    default — a bridge user meters nothing until an operator assigns a tier. A municipality's
+    billing subject is <span class="m">COALESCE(billing_user_id, bridge_user_id)</span>; when both
+    are null, that town's on-chain writes are charged to nobody, silently.
+  </div>
+</section>
+
+<footer>
+  <span>Civic-Chain · system data-flow</span>
+  <span>derived from the repository, 2026-09-03</span>
+  <span>green = value · blue = record</span>
+</footer>
+
+</div>
+</body>
+</html>
